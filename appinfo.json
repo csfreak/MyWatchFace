@@ -1,0 +1,58 @@
+{
+    "appKeys": {
+        "KEY_CONDITIONS": 1,
+        "KEY_TEMPERATURE": 0
+    },
+    "capabilities": [
+        "location"
+    ],
+    "companyName": "CSfreak",
+    "longName": "CSfreak Custom Watchface",
+    "projectType": "native",
+    "resources": {
+        "media": [
+            {
+                "file": "images/bluetooth-icon-mono-not-connected-slash-30x30.png",
+                "name": "BITMAP_BT_MONO_NC",
+                "targetPlatforms": null,
+                "type": "bitmap"
+            },
+            {
+                "file": "images/bluetooth-icon-color-not-connected-30x30.png",
+                "name": "BITMAP_BT_COLOR_NC",
+                "targetPlatforms": null,
+                "type": "bitmap"
+            },
+            {
+                "file": "images/bluetooth-icon-color-connected-30x30.png",
+                "name": "BITMAP_BT_COLOR_CON",
+                "targetPlatforms": null,
+                "type": "bitmap"
+            },
+            {
+                "file": "fonts/perfect-dos-vga.ttf",
+                "name": "FONT_PERFECT_DOS_28",
+                "targetPlatforms": null,
+                "type": "font"
+            },
+            {
+                "compatibility": "2.7",
+                "file": "fonts/perfect-dos-vga.ttf",
+                "name": "FONT_PERFECT_DOS_22",
+                "targetPlatforms": null,
+                "type": "font"
+            }
+        ]
+    },
+    "sdkVersion": "3",
+    "shortName": "CSfreakFace",
+    "targetPlatforms": [
+        "aplite",
+        "basalt"
+    ],
+    "uuid": "8883df8b-3b31-47d1-89f2-83f59c9f5e5f",
+    "versionLabel": "1.0",
+    "watchapp": {
+        "watchface": true
+    }
+}
