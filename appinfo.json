@@ -210,15 +210,15 @@
                 "type": "bitmap"
             },
             {
-                "compatibility": "2.7",
                 "file": "fonts/perfect-dos-vga.ttf",
-                "name": "FONT_PERFECT_DOS_22",
+                "name": "FONT_PERFECT_DOS_28",
                 "targetPlatforms": null,
                 "type": "font"
             },
             {
+                "compatibility": "2.7",
                 "file": "fonts/perfect-dos-vga.ttf",
-                "name": "FONT_PERFECT_DOS_28",
+                "name": "FONT_PERFECT_DOS_22",
                 "targetPlatforms": null,
                 "type": "font"
             }
