@@ -37,7 +37,7 @@
                 "file": "images/BAT-mono-90.png",
                 "name": "BAT_MONO_90",
                 "targetPlatforms": [
-                    "basalt"
+                    "aplite"
                 ],
                 "type": "bitmap"
             },
@@ -45,7 +45,7 @@
                 "file": "images/BAT-mono-80.png",
                 "name": "BAT_MONO_80",
                 "targetPlatforms": [
-                    "basalt"
+                    "aplite"
                 ],
                 "type": "bitmap"
             },
@@ -53,7 +53,7 @@
                 "file": "images/BAT-mono-70.png",
                 "name": "BAT_MONO_70",
                 "targetPlatforms": [
-                    "basalt"
+                    "aplite"
                 ],
                 "type": "bitmap"
             },
@@ -61,7 +61,7 @@
                 "file": "images/BAT-mono-60.png",
                 "name": "BAT_MONO_60",
                 "targetPlatforms": [
-                    "basalt"
+                    "aplite"
                 ],
                 "type": "bitmap"
             },
@@ -69,7 +69,7 @@
                 "file": "images/BAT-mono-50.png",
                 "name": "BAT_MONO_50",
                 "targetPlatforms": [
-                    "basalt"
+                    "aplite"
                 ],
                 "type": "bitmap"
             },
@@ -77,7 +77,7 @@
                 "file": "images/BAT-mono-40.png",
                 "name": "BAT_MONO_40",
                 "targetPlatforms": [
-                    "basalt"
+                    "aplite"
                 ],
                 "type": "bitmap"
             },
@@ -85,7 +85,7 @@
                 "file": "images/BAT-mono-30.png",
                 "name": "BAT_MONO_30",
                 "targetPlatforms": [
-                    "basalt"
+                    "aplite"
                 ],
                 "type": "bitmap"
             },
@@ -93,7 +93,7 @@
                 "file": "images/BAT-mono-20.png",
                 "name": "BAT_MONO_20",
                 "targetPlatforms": [
-                    "basalt"
+                    "aplite"
                 ],
                 "type": "bitmap"
             },
@@ -101,7 +101,7 @@
                 "file": "images/BAT-mono-100.png",
                 "name": "BAT_MONO_100",
                 "targetPlatforms": [
-                    "basalt"
+                    "aplite"
                 ],
                 "type": "bitmap"
             },
@@ -125,7 +125,7 @@
                 "file": "images/BAT-color-90.png",
                 "name": "BAT_COLOR_90",
                 "targetPlatforms": [
-                    "aplite"
+                    "basalt"
                 ],
                 "type": "bitmap"
             },
@@ -133,7 +133,7 @@
                 "file": "images/BAT-color-80.png",
                 "name": "BAT_COLOR_80",
                 "targetPlatforms": [
-                    "aplite"
+                    "basalt"
                 ],
                 "type": "bitmap"
             },
@@ -141,7 +141,7 @@
                 "file": "images/BAT-color-70.png",
                 "name": "BAT_COLOR_70",
                 "targetPlatforms": [
-                    "aplite"
+                    "basalt"
                 ],
                 "type": "bitmap"
             },
@@ -149,7 +149,7 @@
                 "file": "images/BAT-color-60.png",
                 "name": "BAT_COLOR_60",
                 "targetPlatforms": [
-                    "aplite"
+                    "basalt"
                 ],
                 "type": "bitmap"
             },
@@ -157,7 +157,7 @@
                 "file": "images/BAT-color-50.png",
                 "name": "BAT_COLOR_50",
                 "targetPlatforms": [
-                    "aplite"
+                    "basalt"
                 ],
                 "type": "bitmap"
             },
@@ -165,7 +165,7 @@
                 "file": "images/BAT-color-40.png",
                 "name": "BAT_COLOR_40",
                 "targetPlatforms": [
-                    "aplite"
+                    "basalt"
                 ],
                 "type": "bitmap"
             },
@@ -173,7 +173,7 @@
                 "file": "images/BAT-color-30.png",
                 "name": "BAT_COLOR_30",
                 "targetPlatforms": [
-                    "aplite"
+                    "basalt"
                 ],
                 "type": "bitmap"
             },
@@ -181,7 +181,7 @@
                 "file": "images/BAT-color-20.png",
                 "name": "BAT_COLOR_20",
                 "targetPlatforms": [
-                    "aplite"
+                    "basalt"
                 ],
                 "type": "bitmap"
             },
@@ -189,7 +189,7 @@
                 "file": "images/BAT-color-100.png",
                 "name": "BAT_COLOR_100",
                 "targetPlatforms": [
-                    "aplite"
+                    "basalt"
                 ],
                 "type": "bitmap"
             },
