@@ -99,6 +99,94 @@
                 ],
                 "type": "bitmap"
             },
+			{
+                "file": "images/BAT-mono-10.png",
+                "name": "BAT_MONO_10",
+                "targetPlatforms": [
+                    "basalt"
+                ],
+                "type": "bitmap"
+            },
+            {
+                "file": "images/BAT-mono-00.png",
+                "name": "BAT_MONO_00",
+                "targetPlatforms": [
+                    "basalt"
+                ],
+                "type": "bitmap"
+            },
+            {
+                "file": "images/BAT-mono-20.png",
+                "name": "BAT_MONO_20",
+                "targetPlatforms": [
+                    "basalt"
+                ],
+                "type": "bitmap"
+            },
+            {
+                "file": "images/BAT-mono-30.png",
+                "name": "BAT_MONO_30",
+                "targetPlatforms": [
+                    "basalt"
+                ],
+                "type": "bitmap"
+            },
+            {
+                "file": "images/BAT-mono-40.png",
+                "name": "BAT_MONO_40",
+                "targetPlatforms": [
+                    "basalt"
+                ],
+                "type": "bitmap"
+            },
+            {
+                "file": "images/BAT-mono-50.png",
+                "name": "BAT_MONO_50",
+                "targetPlatforms": [
+                    "basalt"
+                ],
+                "type": "bitmap"
+            },
+            {
+                "file": "images/BAT-mono-60.png",
+                "name": "BAT_MONO_60",
+                "targetPlatforms": [
+                    "basalt"
+                ],
+                "type": "bitmap"
+            },
+            {
+                "file": "images/BAT-mono-70.png",
+                "name": "BAT_MONO_70",
+                "targetPlatforms": [
+                    "basalt"
+                ],
+                "type": "bitmap"
+            },
+            {
+                "file": "images/BAT-mono-80.png",
+                "name": "BAT_MONO_80",
+                "targetPlatforms": [
+                    "basalt"
+                ],
+                "type": "bitmap"
+            },
+            {
+                "file": "images/BAT-mono-90.png",
+                "name": "BAT_MONO_90",
+                "targetPlatforms": [
+                    "basalt"
+                ],
+                "type": "bitmap"
+            },
+            {
+                "file": "images/BAT-mono-100.png",
+                "name": "BAT_MONO_100",
+                "targetPlatforms": [
+                    "basalt"
+                ],
+                "type": "bitmap"
+            },
             {
                 "file": "images/bluetooth-icon-connected-30x30.png",
                 "name": "BITMAP_BT_COLOR_CON",
