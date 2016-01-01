@@ -53,7 +53,7 @@
             },
             {
                 "file": "images/BAT-color-50.png",
-                "name": "BAT_COLOR_00",
+                "name": "BAT_COLOR_50",
                 "targetPlatforms": [
                     "basalt"
                 ],
