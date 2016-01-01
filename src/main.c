@@ -9,8 +9,11 @@ static TextLayer *s_time_layer, *s_weather_layer, *s_date_layer, *s_day_layer;
 //static BitmapLayer *s_background_layer;
 //static GBitmap *s_background_bitmap;
 
-static BitmapLayer *s_bticon_layer;
-static GBitmap *s_bticon_con_bitmap, *s_bticon_nc_bitmap;
+static BitmapLayer *s_bticon_layer, *s_baticon_layer;
+static GBitmap *s_bticon_con_bitmap, *s_bticon_nc_bitmap, *s_baticon_00_bitmap, 
+    *s_baticon_10_bitmap, *s_baticon_20_bitmap, *s_baticon_30_bitmap, *s_baticon_40_bitmap,
+	*s_baticon_50_bitmap, *s_baticon_60_bitmap, *s_baticon_70_bitmap, *s_baticon_80_bitmap,
+	*s_baticon_90_bitmap, *s_baticon_100_bitmap;
 
 static GFont s_time_font, s_other_font;
 
@@ -112,8 +115,36 @@ static void bt_handler(bool connected) {
 
 static void battery_handler(BatteryChargeState charge_state) {
     APP_LOG(APP_LOG_LEVEL_INFO, "BatteryStateChange");
+    bitmap_layer_set_bitmap(s_baticon_layer, s_baticon_100_bitmap);
 }
     
+static void set_bat_icon_color() {
+	s_baticon_00_bitmap = gbitmap_create_with_resource(RESOURCE_ID_BAT_COLOR_00);
+	s_baticon_10_bitmap = gbitmap_create_with_resource(RESOURCE_ID_BAT_COLOR_10);
+	s_baticon_20_bitmap = gbitmap_create_with_resource(RESOURCE_ID_BAT_COLOR_20);
+	s_baticon_30_bitmap = gbitmap_create_with_resource(RESOURCE_ID_BAT_COLOR_30);
+	s_baticon_40_bitmap = gbitmap_create_with_resource(RESOURCE_ID_BAT_COLOR_40);
+	s_baticon_50_bitmap = gbitmap_create_with_resource(RESOURCE_ID_BAT_COLOR_50);
+	s_baticon_60_bitmap = gbitmap_create_with_resource(RESOURCE_ID_BAT_COLOR_60);
+	s_baticon_70_bitmap = gbitmap_create_with_resource(RESOURCE_ID_BAT_COLOR_70);
+	s_baticon_80_bitmap = gbitmap_create_with_resource(RESOURCE_ID_BAT_COLOR_80);
+	s_baticon_90_bitmap = gbitmap_create_with_resource(RESOURCE_ID_BAT_COLOR_90);
+	s_baticon_100_bitmap = gbitmap_create_with_resource(RESOURCE_ID_BAT_COLOR_100);
+}
+
+static void set_bat_icon_mono() { 
+	s_baticon_00_bitmap = gbitmap_create_with_resource(RESOURCE_ID_BAT_MONO_00);
+	s_baticon_10_bitmap = gbitmap_create_with_resource(RESOURCE_ID_BAT_MONO_10);
+	s_baticon_20_bitmap = gbitmap_create_with_resource(RESOURCE_ID_BAT_MONO_20);
+	s_baticon_30_bitmap = gbitmap_create_with_resource(RESOURCE_ID_BAT_MONO_30);
+	s_baticon_40_bitmap = gbitmap_create_with_resource(RESOURCE_ID_BAT_MONO_40);
+	s_baticon_50_bitmap = gbitmap_create_with_resource(RESOURCE_ID_BAT_MONO_50);
+	s_baticon_60_bitmap = gbitmap_create_with_resource(RESOURCE_ID_BAT_MONO_60);
+	s_baticon_70_bitmap = gbitmap_create_with_resource(RESOURCE_ID_BAT_MONO_70);
+	s_baticon_80_bitmap = gbitmap_create_with_resource(RESOURCE_ID_BAT_MONO_80);
+	s_baticon_90_bitmap = gbitmap_create_with_resource(RESOURCE_ID_BAT_MONO_90);
+	s_baticon_100_bitmap = gbitmap_create_with_resource(RESOURCE_ID_BAT_MONO_100);
+}
 
 static void main_window_load(Window *window) {
   // Get information about the Window
@@ -123,10 +154,14 @@ static void main_window_load(Window *window) {
   // Create GBitmap
   s_bticon_con_bitmap = gbitmap_create_with_resource(RESOURCE_ID_BITMAP_BT_COLOR_CON);
   s_bticon_nc_bitmap = gbitmap_create_with_resource(PBL_IF_COLOR_ELSE(RESOURCE_ID_BITMAP_BT_COLOR_NC,RESOURCE_ID_BITMAP_BT_MONO_NC));
-
+ 
+  //Call function to set gbitmaps from resources based on screen color depth
+  PBL_IF_COLOR_ELSE(set_bat_icon_color(), set_bat_icon_mono());
+  
   // Create BitmapLayer to display the GBitmap
   s_bticon_layer = bitmap_layer_create(GRect(0, 137, 30, 30));
-
+  s_baticon_layer = bitmap_layer_create(GRECT(bounds.size.w - 20, 137, 20, 30
+  
   // Set the bitmap onto the layer and add to the window
   if (connection_service_peek_pebble_app_connection()) {
       bitmap_layer_set_bitmap(s_bticon_layer, s_bticon_con_bitmap);
@@ -134,10 +169,15 @@ static void main_window_load(Window *window) {
       bitmap_layer_set_bitmap(s_bticon_layer, s_bticon_nc_bitmap);
   }
   
+  //use battery handler to set state on window draw
+  battery_handler(battery_state_service_peek());
   
+  //Draw Bitmap Layers
   bitmap_layer_set_compositing_mode(s_bticon_layer, GCompOpSet);
   layer_add_child(window_layer, bitmap_layer_get_layer(s_bticon_layer));
-
+  bitmap_layer_set_compositing_mode(s_baticon_layer, GCompOpSet);
+  layer_add_child(window_layer, bitmap_layer_get_layer(s_baticon_layer));
+  
   // Create the TextLayer with specific bounds
   s_time_layer = text_layer_create(
       GRect(0, 64, bounds.size.w, 40)); 
