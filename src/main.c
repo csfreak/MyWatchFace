@@ -117,7 +117,7 @@ static void main_window_load(Window *window) {
 
   // Create GBitmap
   s_bticon_con_bitmap = gbitmap_create_with_resource(RESOURCE_ID_BITMAP_BT_COLOR_CON);
-  s_bticon_nc_bitmap = gbitmap_create_with_resource(RESOURCE_ID_BITMAP_BT_MONO_NC);
+  s_bticon_nc_bitmap = gbitmap_create_with_resource(PBL_IF_COLOR_ELSE(RESOURCE_ID_BITMAP_BT_COLOR_NC,RESOURCE_ID_BITMAP_BT_MONO_NC));
 
   // Create BitmapLayer to display the GBitmap
   s_bticon_layer = bitmap_layer_create(GRect(0, 137, 30, 30));

@@ -12,21 +12,25 @@
     "resources": {
         "media": [
             {
+                "file": "images/bluetooth-icon-connected-30x30.png",
+                "name": "BITMAP_BT_COLOR_CON",
+                "targetPlatforms": null,
+                "type": "bitmap"
+            },
+            {
                 "file": "images/bluetooth-icon-mono-not-connected-slash-30x30.png",
                 "name": "BITMAP_BT_MONO_NC",
-                "targetPlatforms": null,
+                "targetPlatforms": [
+                    "aplite"
+                ],
                 "type": "bitmap"
             },
             {
                 "file": "images/bluetooth-icon-color-not-connected-30x30.png",
                 "name": "BITMAP_BT_COLOR_NC",
-                "targetPlatforms": null,
-                "type": "bitmap"
-            },
-            {
-                "file": "images/bluetooth-icon-color-connected-30x30.png",
-                "name": "BITMAP_BT_COLOR_CON",
-                "targetPlatforms": null,
+                "targetPlatforms": [
+                    "basalt"
+                ],
                 "type": "bitmap"
             },
             {
