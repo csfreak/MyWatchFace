@@ -110,6 +110,11 @@ static void bt_handler(bool connected) {
   }
 }
 
+static void battery_handler(BatteryChargeState charge_state) {
+    APP_LOG(APP_LOG_LEVEL_INFO, "BatteryStateChange");
+}
+    
+
 static void main_window_load(Window *window) {
   // Get information about the Window
   Layer *window_layer = window_get_root_layer(window);
@@ -241,7 +246,8 @@ static void init() {
   //
   // Subscribe to get connection events
   connection_service_subscribe((ConnectionHandlers) { .pebble_app_connection_handler = bt_handler});
-
+  // Subscribe to battery events
+  battery_state_service_subscribe(battery_handler);
   // Register callbacks
   app_message_register_inbox_received(inbox_received_callback);
   app_message_register_inbox_dropped(inbox_dropped_callback);
