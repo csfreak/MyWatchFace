@@ -160,7 +160,7 @@ static void main_window_load(Window *window) {
   
   // Create BitmapLayer to display the GBitmap
   s_bticon_layer = bitmap_layer_create(GRect(0, 137, 30, 30));
-  s_baticon_layer = bitmap_layer_create(GRECT(bounds.size.w - 20, 137, 20, 30
+  s_baticon_layer = bitmap_layer_create(GRect(bounds.size.w - 20, 137, 20, 30));
   
   // Set the bitmap onto the layer and add to the window
   if (connection_service_peek_pebble_app_connection()) {
