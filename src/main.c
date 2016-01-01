@@ -118,7 +118,7 @@ static void battery_handler(BatteryChargeState charge_state) {
     bitmap_layer_set_bitmap(s_baticon_layer, s_baticon_100_bitmap);
 }
     
-static void set_bat_icon_color() {
+/*static void set_bat_icon_color() {
 	s_baticon_00_bitmap = gbitmap_create_with_resource(RESOURCE_ID_BAT_COLOR_00);
 	s_baticon_10_bitmap = gbitmap_create_with_resource(RESOURCE_ID_BAT_COLOR_10);
 	s_baticon_20_bitmap = gbitmap_create_with_resource(RESOURCE_ID_BAT_COLOR_20);
@@ -144,8 +144,21 @@ static void set_bat_icon_mono() {
 	s_baticon_80_bitmap = gbitmap_create_with_resource(RESOURCE_ID_BAT_MONO_80);
 	s_baticon_90_bitmap = gbitmap_create_with_resource(RESOURCE_ID_BAT_MONO_90);
 	s_baticon_100_bitmap = gbitmap_create_with_resource(RESOURCE_ID_BAT_MONO_100);
-}
+}*/
 
+static void set_bat_icon() {
+	s_baticon_00_bitmap = gbitmap_create_with_resource(PBL_IF_COLOR_ELSE(RESOURCE_ID_BAT_COLOR_00,RESOURCE_ID_BAT_MONO_00);
+	s_baticon_10_bitmap = gbitmap_create_with_resource(PBL_IF_COLOR_ELSE(RESOURCE_ID_BAT_COLOR_10,RESOURCE_ID_BAT_MONO_10);
+	s_baticon_20_bitmap = gbitmap_create_with_resource(PBL_IF_COLOR_ELSE(RESOURCE_ID_BAT_COLOR_20,RESOURCE_ID_BAT_MONO_20);
+	s_baticon_30_bitmap = gbitmap_create_with_resource(PBL_IF_COLOR_ELSE(RESOURCE_ID_BAT_COLOR_30,RESOURCE_ID_BAT_MONO_30);
+	s_baticon_40_bitmap = gbitmap_create_with_resource(PBL_IF_COLOR_ELSE(RESOURCE_ID_BAT_COLOR_40,RESOURCE_ID_BAT_MONO_40);
+	s_baticon_50_bitmap = gbitmap_create_with_resource(PBL_IF_COLOR_ELSE(RESOURCE_ID_BAT_COLOR_50,RESOURCE_ID_BAT_MONO_50);
+	s_baticon_60_bitmap = gbitmap_create_with_resource(PBL_IF_COLOR_ELSE(RESOURCE_ID_BAT_COLOR_60,RESOURCE_ID_BAT_MONO_60);
+	s_baticon_70_bitmap = gbitmap_create_with_resource(PBL_IF_COLOR_ELSE(RESOURCE_ID_BAT_COLOR_70,RESOURCE_ID_BAT_MONO_70);
+	s_baticon_80_bitmap = gbitmap_create_with_resource(PBL_IF_COLOR_ELSE(RESOURCE_ID_BAT_COLOR_80,RESOURCE_ID_BAT_MONO_80);
+	s_baticon_90_bitmap = gbitmap_create_with_resource(PBL_IF_COLOR_ELSE(RESOURCE_ID_BAT_COLOR_90,RESOURCE_ID_BAT_MONO_90);
+	s_baticon_100_bitmap = gbitmap_create_with_resource(PBL_IF_COLOR_ELSE(RESOURCE_ID_BAT_COLOR_100,RESOURCE_ID_BAT_MONO_100);
+}
 static void main_window_load(Window *window) {
   // Get information about the Window
   Layer *window_layer = window_get_root_layer(window);
@@ -156,7 +169,9 @@ static void main_window_load(Window *window) {
   s_bticon_nc_bitmap = gbitmap_create_with_resource(PBL_IF_COLOR_ELSE(RESOURCE_ID_BITMAP_BT_COLOR_NC,RESOURCE_ID_BITMAP_BT_MONO_NC));
  
   //Call function to set gbitmaps from resources based on screen color depth
-  PBL_IF_COLOR_ELSE(set_bat_icon_color(), set_bat_icon_mono());
+  set_bat_icon();
+  //old way didnt work.
+  //PBL_IF_COLOR_ELSE(set_bat_icon_color(), set_bat_icon_mono());
   
   // Create BitmapLayer to display the GBitmap
   s_bticon_layer = bitmap_layer_create(GRect(0, 137, 30, 30));
