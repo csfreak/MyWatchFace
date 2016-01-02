@@ -117,7 +117,45 @@ static void battery_handler(BatteryChargeState charge_state) {
     static char level[5];
     snprintf(level, sizeof(level), "%d", (int)charge_state.charge_percent);
     APP_LOG(APP_LOG_LEVEL_INFO, "BatteryStateChange. Level = %s", level);
-    bitmap_layer_set_bitmap(s_baticon_layer, s_baticon_100_bitmap);
+    
+	switch ((int)charge_state.charge_percent) {
+		case 0:
+			bitmap_layer_set_bitmap(s_baticon_layer, s_baticon_00_bitmap);
+			break;
+		case 10:
+			bitmap_layer_set_bitmap(s_baticon_layer, s_baticon_10_bitmap);
+			break;
+		case 20:
+			bitmap_layer_set_bitmap(s_baticon_layer, s_baticon_20_bitmap);
+			break;
+		case 30:
+			bitmap_layer_set_bitmap(s_baticon_layer, s_baticon_30_bitmap);
+			break;
+		case 40:
+			bitmap_layer_set_bitmap(s_baticon_layer, s_baticon_40_bitmap);
+			break;
+		case 50:
+			bitmap_layer_set_bitmap(s_baticon_layer, s_baticon_50_bitmap);
+			break;
+		case 60:
+			bitmap_layer_set_bitmap(s_baticon_layer, s_baticon_60_bitmap);
+			break;
+		case 70:
+			bitmap_layer_set_bitmap(s_baticon_layer, s_baticon_70_bitmap);
+			break;
+		case 80:
+			bitmap_layer_set_bitmap(s_baticon_layer, s_baticon_80_bitmap);
+			break;
+		case 90:
+			bitmap_layer_set_bitmap(s_baticon_layer, s_baticon_90_bitmap);
+			break;
+		case 100:
+			bitmap_layer_set_bitmap(s_baticon_layer, s_baticon_100_bitmap);
+			break;
+		default:
+			break;
+	};
+    //bitmap_layer_set_bitmap(s_baticon_layer, s_baticon_100_bitmap);
 }
     
 /*static void set_bat_icon_color() {
