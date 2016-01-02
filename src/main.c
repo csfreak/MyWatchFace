@@ -22,7 +22,7 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
   static char temperature_buffer[8];
   static char conditions_buffer[32];
   static char weather_layer_buffer[32];
-
+  static char battery_buffer[8];
   // Read tuples for data
   Tuple *temp_tuple = dict_find(iterator, KEY_TEMPERATURE);
   Tuple *conditions_tuple = dict_find(iterator, KEY_CONDITIONS);
@@ -36,6 +36,12 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
     snprintf(weather_layer_buffer, sizeof(weather_layer_buffer), "%s, %s", temperature_buffer, conditions_buffer);
     text_layer_set_text(s_weather_layer, weather_layer_buffer);
   }
+  
+  Tuple *battery_tuple = dict_find(iterator, KEY_BATTERY);
+  
+  if(battery_tuple) {
+  	APP_LOG(APP_LOG_LEVEL_INFO, "Phone Battery Level: %d", (int)battery_tuple->value->int32);
+  }	 
 }
 
 static void inbox_dropped_callback(AppMessageResult reason, void *context) {

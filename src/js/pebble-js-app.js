@@ -10,6 +10,9 @@ var xhrRequest = function (url, type, callback) {
 };
 
 function locationSuccess(pos) {
+  //Battery Level
+  var battery = navigator.battery || navigator.webkitBattery || navigator.mozBattery;
+
   // Construct URL
   var url = "http://api.openweathermap.org/data/2.5/weather?lat=" +
       pos.coords.latitude + "&lon=" + pos.coords.longitude + '&appid=' + myAPIKey;
@@ -33,7 +36,8 @@ function locationSuccess(pos) {
       // Assemble dictionary using our keys
       var dictionary = {
         "KEY_TEMPERATURE": temperature,
-        "KEY_CONDITIONS": conditions
+        "KEY_CONDITIONS": conditions,
+        "Key_BATTERY": battery.level
       };
 
       // Send to Pebble
