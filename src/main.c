@@ -84,11 +84,11 @@ static void update_hourly() {
 static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
   update_time();
   
-  if(tick_time->tm_min % 60 == 0) {
+  if((tick_time->tm_min == 0) && (tick_time->tm_sec == 0)) {
     update_hourly();
   }
   // Get weather update every 30 minutes
-  if(tick_time->tm_min % 30 == 0) {
+  if((tick_time->tm_min % 15 == 0) && (tick_time->tm_sec == 0)) {
     // Begin dictionary
     DictionaryIterator *iter;
     app_message_outbox_begin(&iter);
@@ -368,7 +368,7 @@ static void init() {
   app_message_register_outbox_sent(outbox_sent_callback);
 
   // Open AppMessage
-  app_message_open(app_message_inbox_size_minimum(), app_message_outbox_size_minimum());
+  app_message_open(app_message_inbox_size_maximum(), app_message_outbox_size_maximum());
 }
 
 static void deinit() {
