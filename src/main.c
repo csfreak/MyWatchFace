@@ -15,7 +15,7 @@ static GBitmap *s_bticon_con_bitmap, *s_bticon_nc_bitmap, *s_baticon_00_bitmap,
 	*s_baticon_50_bitmap, *s_baticon_60_bitmap, *s_baticon_70_bitmap, *s_baticon_80_bitmap,
 	*s_baticon_90_bitmap, *s_baticon_100_bitmap;
 
-static GFont s_time_font, s_other_font;
+static GFont s_time_font, s_weather_font, s_other_font;
 
 static void inbox_received_callback(DictionaryIterator *iterator, void *context) {
   // Store incoming information
@@ -235,16 +235,16 @@ static void main_window_load(Window *window) {
   
   // Create the TextLayer with specific bounds
   s_time_layer = text_layer_create(
-      GRect(0, 64, bounds.size.w, 40)); 
+      GRect(0, 28, bounds.size.w, 45)); 
 
   // Improve the layout to be more like a watchface
-  text_layer_set_background_color(s_time_layer, GColorBlack);
-  text_layer_set_text_color(s_time_layer, GColorWhite);
+  text_layer_set_background_color(s_time_layer, GColorWhite);
+  text_layer_set_text_color(s_time_layer, GColorBlack);
   text_layer_set_text(s_time_layer, "00:00:00");
   text_layer_set_text_alignment(s_time_layer, GTextAlignmentCenter);
 
   // Create GFont
-  s_time_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_PERFECT_DOS_28));
+  s_time_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_PERFECT_DOS_32));
 
   // Apply to TextLayer
   text_layer_set_font(s_time_layer, s_time_font);
@@ -254,7 +254,7 @@ static void main_window_load(Window *window) {
 
   // Create temperature Layer
   s_weather_layer = text_layer_create(
-      GRect(0, 0, bounds.size.w, 32));
+      GRect(0, 0, bounds.size.w, 28));
 
   // Style the text
   text_layer_set_background_color(s_weather_layer, GColorClear);
@@ -263,13 +263,14 @@ static void main_window_load(Window *window) {
   text_layer_set_text(s_weather_layer, "Loading...");
 
   // Create second custom font, apply it and add to Window
-  s_other_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_PERFECT_DOS_22));
-  text_layer_set_font(s_weather_layer, s_other_font);
+  s_other_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_PERFECT_DOS_20));
+  s_weather_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_PERFECT_DOS_18));
+  text_layer_set_font(s_weather_layer, s_weather_font);
   layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_weather_layer));
   
    // Create date Layer
   s_date_layer = text_layer_create(
-      GRect(0, 32, bounds.size.w, 32));
+      GRect(0, 100, bounds.size.w, 30));
 
   // Style the text
   text_layer_set_background_color(s_date_layer, GColorWhite);
@@ -283,11 +284,11 @@ static void main_window_load(Window *window) {
   
      // Create date Layer
   s_day_layer = text_layer_create(
-      GRect(0, 104, bounds.size.w, 32));
+      GRect(0, 70, bounds.size.w, 30));
 
   // Style the text
-  text_layer_set_background_color(s_day_layer, GColorWhite);
-  text_layer_set_text_color(s_day_layer, GColorBlack);
+  text_layer_set_background_color(s_day_layer, GColorBlack);
+  text_layer_set_text_color(s_day_layer, GColorWhite);
   text_layer_set_text_alignment(s_day_layer, GTextAlignmentCenter);
   text_layer_set_text(s_day_layer, "Wednesday");
 
@@ -302,18 +303,35 @@ static void main_window_unload(Window *window) {
   text_layer_destroy(s_weather_layer);
   text_layer_destroy(s_date_layer);
   text_layer_destroy(s_day_layer);
+  bitmap_layer_destroy(s_bticon_layer);
+  bitmap_layer_destroy(s_baticon_layer);
   // Unload GFont
   fonts_unload_custom_font(s_time_font);
 
   // Destroy GBitmap
-  //gbitmap_destroy(s_background_bitmap);
-
+  gbitmap_destroy(s_bticon_con_bitmap);
+  gbitmap_destroy(s_bticon_nc_bitmap);
+  gbitmap_destroy(s_baticon_00_bitmap);
+  gbitmap_destroy(s_baticon_10_bitmap);
+  gbitmap_destroy(s_baticon_20_bitmap);
+  gbitmap_destroy(s_baticon_30_bitmap);
+  gbitmap_destroy(s_baticon_40_bitmap);
+  gbitmap_destroy(s_baticon_50_bitmap);
+  gbitmap_destroy(s_baticon_60_bitmap);
+  gbitmap_destroy(s_baticon_70_bitmap);
+  gbitmap_destroy(s_baticon_80_bitmap);
+  gbitmap_destroy(s_baticon_90_bitmap);
+  gbitmap_destroy(s_baticon_100_bitmap);
+    
   // Destroy BitmapLayer
   //bitmap_layer_destroy(s_background_layer);
 
   // Destroy weather elements
   fonts_unload_custom_font(s_other_font);
+  fonts_unload_custom_font(s_weather_font);
+    
   connection_service_unsubscribe();
+  battery_state_service_unsubscribe();
 }
 
 

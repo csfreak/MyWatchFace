@@ -1,4 +1,4 @@
-var myAPIKey = '81d7cd5bbf216ebdbff899b3019c69c7 ';
+var myAPIKey = '81d7cd5bbf216ebdbff899b3019c69c7';
 
 var xhrRequest = function (url, type, callback) {
   var xhr = new XMLHttpRequest();
@@ -21,13 +21,13 @@ function locationSuccess(pos) {
       var json = JSON.parse(responseText);
       console.log("Raw JSON " + JSON.stringify(json));
       // Temperature in Kelvin requires adjustment
-      //var temperature = Math.round((json.main.temp - 273.15) * 1.800 + 32.0);
-      var temperature = 52;
+      var temperature = Math.round((json.main.temp - 273.15) * 1.800 + 32.0);
+      //var temperature = 52;
       console.log("Temperature is " + temperature);
 
       // Conditions
-      //var conditions = json.weather[0].main;
-      var conditions = "Rain";
+      var conditions = json.weather[0].main;
+      //var conditions = "Rain";
       console.log("Conditions are " + conditions);
       
       // Assemble dictionary using our keys
