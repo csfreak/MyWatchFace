@@ -114,7 +114,7 @@ static void bt_handler(bool connected) {
 }
 
 static void battery_handler(BatteryChargeState charge_state) {
-    static char level[2];
+    static char level[5];
     snprintf(level, sizeof(level), "%d", (int)charge_state.charge_percent);
     APP_LOG(APP_LOG_LEVEL_INFO, "BatteryStateChange. Level = %s", level);
     bitmap_layer_set_bitmap(s_baticon_layer, s_baticon_100_bitmap);
