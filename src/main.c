@@ -1,4 +1,7 @@
 #include <pebble.h>
+#include "globals.h"
+#include "sm_watchapp.h"
+#include "sm_callbacks.h"
 
 #define KEY_TEMPERATURE 0
 #define KEY_CONDITIONS 1
