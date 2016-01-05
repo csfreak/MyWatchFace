@@ -145,4 +145,5 @@ void sm_open_app_message() {
 
 void sm_close_app_message() {
   app_message_deregister_callbacks();
+  //Add Cancel Timers Here
 }
