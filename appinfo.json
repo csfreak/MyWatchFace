@@ -227,7 +227,50 @@
                 "name": "FONT_PERFECT_DOS_32",
                 "targetPlatforms": null,
                 "type": "font"
-            }
+            },{
+	        "type": "png",
+	        "name": "IMAGE_SUN",
+	        "file": "images/sun.png"
+	    },
+		{
+	        "type": "png",
+	        "name": "IMAGE_RAIN",
+	        "file": "images/rain.png"
+	    },
+		{
+	        "type": "png",
+	        "name": "IMAGE_CLOUD",
+	        "file": "images/cloud.png"
+	    },
+		{
+	        "type": "png",
+	        "name": "IMAGE_SUN_CLOUD",
+	        "file": "images/sun_cloud.png"
+	    }
+		,
+		{
+	        "type": "png",
+	        "name": "IMAGE_WIND",
+	        "file": "images/wind.png"
+	    }
+		,
+		{
+	        "type": "png",
+	        "name": "IMAGE_FOG",
+	        "file": "images/fog.png"
+	    }	
+		,
+		{
+	        "type": "png",
+	        "name": "IMAGE_SNOW",
+	        "file": "images/snow.png"
+	    }
+		,
+		{
+	        "type": "png",
+	        "name": "IMAGE_THUNDER",
+	        "file": "images/thunder.png"
+	    }	
         ]
     },
     "sdkVersion": "3",
