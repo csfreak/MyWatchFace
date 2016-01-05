@@ -270,7 +270,12 @@
 	        "type": "png",
 	        "name": "IMAGE_THUNDER",
 	        "file": "images/thunder.png"
-	    }	
+	    },
+		{
+	        "type": "png",
+	        "name": "IMAGE_DISCONNECT",
+	        "file": "images/disconnect_large.png"
+	    }
         ]
     },
     "sdkVersion": "3",
