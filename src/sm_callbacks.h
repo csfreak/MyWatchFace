@@ -7,5 +7,4 @@ void sm_battery_callback();
 void sm_music_callback();
 void sm_calendar_callback();
 
-int test;
 #endif
