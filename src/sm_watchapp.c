@@ -114,6 +114,8 @@ void sm_rcv(DictionaryIterator *received, void *context) {
 
 		if (timerUpdateWeather != NULL)
 			app_timer_cancel(timerUpdateWeather);
+		APP_LOG(APP_LOG_LEVEL_INFO, "Recieved Music Interval, %d" , interval);
+
 		//timerUpdateWeather = app_timer_register(interval , sm_updateWeather, NULL);
 	}
 
@@ -123,6 +125,7 @@ void sm_rcv(DictionaryIterator *received, void *context) {
 
 		if (timerUpdateCalendar != NULL)
 			app_timer_cancel(timerUpdateCalendar);
+		APP_LOG(APP_LOG_LEVEL_INFO, "Recieved Calendar Interval, %d" , interval);
 		//timerUpdateCalendar = app_timer_register(interval , sm_updateCalendar, NULL);
 	}
 
@@ -132,16 +135,17 @@ void sm_rcv(DictionaryIterator *received, void *context) {
 
 		if (timerUpdateMusic != NULL)
 			app_timer_cancel(timerUpdateMusic);
+		APP_LOG(APP_LOG_LEVEL_INFO, "Recieved Music Interval, %d" , interval);
 		//timerUpdateMusic = app_timer_register(interval , sm_updateMusic, NULL);
 
 	}
 	
 	//Process Callbacks
-	if (doCal) { sm_calendar_callback(); };
-	if (doWeather) { sm_weather_callback(); };
-	if (doBatt) { sm_battery_callback(); };
-	if (doMusic) { sm_music_callback(); };
-	if (doStocks) { sm_stocks_callback(); };
+	if (doCal) sm_calendar_callback();
+	if (doWeather) sm_weather_callback();
+	if (doBatt) sm_battery_callback();
+	if (doMusic) sm_music_callback();
+	if (doStocks) sm_stocks_callback();
 
 
 }
