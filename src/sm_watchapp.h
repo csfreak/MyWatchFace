@@ -11,9 +11,9 @@ int sm_weather_img, sm_batteryPercent, sm_batteryPblPercent;
 char sm_calendar_date_str[STRING_LENGTH], sm_calendar_text_str[STRING_LENGTH];
 char sm_music_artist_str1[STRING_LENGTH], sm_music_title_str1[STRING_LENGTH];
 
-AppTimer *timerUpdateCalendar = NULL;
-AppTimer *timerUpdateWeather = NULL;
-AppTimer *timerUpdateMusic = NULL;
+AppTimer *timerUpdateCalendar;
+AppTimer *timerUpdateWeather;
+AppTimer *timerUpdateMusic;
 
 
 const int WEATHER_IMG_IDS[] = {	
