@@ -135,6 +135,14 @@ void sm_rcv(DictionaryIterator *received, void *context) {
 		//timerUpdateMusic = app_timer_register(interval , sm_updateMusic, NULL);
 
 	}
+	
+	//Process Callbacks
+	if (doCal) { sm_calendar_callback(); };
+	if (doWeather) { sm_weather_callback(); };
+	if (doBatt) { sm_battery_callback(); };
+	if (doMusic) { sm_music_callback(); };
+	if (doStocks) { sm_stocks_callback(); };
+
 
 }
 
