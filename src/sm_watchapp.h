@@ -4,12 +4,12 @@
 #define STRING_LENGTH 255
 #define NUM_WEATHER_IMAGES	9
 
-extern char sm_string_buffer;
-extern char sm_weather_cond_str, sm_weather_temp_str;
+extern char sm_string_buffer[STRING_LENGTH];
+extern char sm_weather_cond_str[STRING_LENGTH], sm_weather_temp_str[5];
 extern int sm_weather_img, sm_batteryPercent, sm_batteryPblPercent;
 
-extern char sm_calendar_date_str, sm_calendar_text_str;
-extern char sm_music_artist_str1, sm_music_title_str1;
+extern char sm_calendar_date_str[STRING_LENGTH], sm_calendar_text_str[STRING_LENGTH];
+extern char sm_music_artist_str1[STRING_LENGTH], sm_music_title_str1[STRING_LENGTH];
 
 extern AppTimer *timerUpdateCalendar;
 extern AppTimer *timerUpdateWeather;
