@@ -3,8 +3,8 @@
 #include "sm_watchapp.h"
 #include "sm_callbacks.h"
 
-#define KEY_TEMPERATURE 0
-#define KEY_CONDITIONS 1
+//#define KEY_TEMPERATURE 0
+//#define KEY_CONDITIONS 1
 
 static Window *s_main_window;
 static TextLayer *s_time_layer, *s_weather_layer, *s_date_layer, *s_day_layer;
@@ -20,7 +20,7 @@ static GBitmap *s_bticon_con_bitmap, *s_bticon_nc_bitmap, *s_baticon_00_bitmap,
 
 static GFont s_time_font, s_weather_font, s_other_font;
 
-static void inbox_received_callback(DictionaryIterator *iterator, void *context) {
+/*static void inbox_received_callback(DictionaryIterator *iterator, void *context) {
   // Store incoming information
   static char temperature_buffer[8];
   static char conditions_buffer[32];
@@ -52,7 +52,7 @@ static void outbox_failed_callback(DictionaryIterator *iterator, AppMessageResul
 static void outbox_sent_callback(DictionaryIterator *iterator, void *context) {
   APP_LOG(APP_LOG_LEVEL_INFO, "Outbox send success!");
 }
-
+*/
 static void update_time() {
   // Get a tm structure
   time_t temp = time(NULL);  
@@ -365,13 +365,14 @@ static void init() {
   // Subscribe to battery events
   battery_state_service_subscribe(battery_handler);
   // Register callbacks
-  app_message_register_inbox_received(inbox_received_callback);
+  /*app_message_register_inbox_received(inbox_received_callback);
   app_message_register_inbox_dropped(inbox_dropped_callback);
   app_message_register_outbox_failed(outbox_failed_callback);
   app_message_register_outbox_sent(outbox_sent_callback);
 
   // Open AppMessage
   app_message_open(app_message_inbox_size_maximum(), app_message_outbox_size_maximum());
+  */
 }
 
 static void deinit() {
