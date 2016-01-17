@@ -20,7 +20,7 @@ static TextLayer *s_time_layer, *s_weather_layer, *s_date_layer, *s_day_layer;
 //static BitmapLayer *s_background_layer;
 //static GBitmap *s_background_bitmap;
 
-static BitmapLayer *s_bticon_layer, *s_baticon_layer;
+static BitmapLayer *s_bticon_layer, *s_baticon_layer, *s_pbaticon_layer;
 static GBitmap *s_bticon_con_bitmap, *s_bticon_nc_bitmap, *s_baticon_00_bitmap, 
     *s_baticon_10_bitmap, *s_baticon_20_bitmap, *s_baticon_30_bitmap, *s_baticon_40_bitmap,
 	*s_baticon_50_bitmap, *s_baticon_60_bitmap, *s_baticon_70_bitmap, *s_baticon_80_bitmap,
@@ -30,115 +30,6 @@ static GFont s_time_font, s_weather_font, s_other_font;
 
 static AppTimer *weatherHandle, *stockHandle;
 
-static void inbox_received_callback(DictionaryIterator *iterator, void *context) {
-  // Store incoming information
-  static char temperature_buffer[8];
-  static char conditions_buffer[32];
-  static char weather_layer_buffer[32];
-  // Read tuples for data
-  Tuple *temp_tuple = dict_find(iterator, CS_WEATHER_TEMP_F_KEY);
-  Tuple *conditions_tuple = dict_find(iterator, CS_WEATHER_COND_KEY);
-
-  // If all data is available, use it
-  if(temp_tuple && conditions_tuple) {
-    snprintf(temperature_buffer, sizeof(temperature_buffer), "%d°F", (int)temp_tuple->value->int32);
-    snprintf(conditions_buffer, sizeof(conditions_buffer), "%s", conditions_tuple->value->cstring);
-
-    // Assemble full string and display
-    snprintf(weather_layer_buffer, sizeof(weather_layer_buffer), "%s, %s", temperature_buffer, conditions_buffer);
-    text_layer_set_text(s_weather_layer, weather_layer_buffer);
-  }
-  
-  Tuple *battery_tuple = dict_find(iterator, CS_BATTERY_LEVEL_KEY);
-  
-  if(battery_tuple) {
-  	APP_LOG(APP_LOG_LEVEL_INFO, "Phone Battery Level: %f", (float)battery_tuple->value->float_t);
-  	phone_battery_handler((float)battery_tuple->value->float_t);
-  }	 
-}
-
-static void inbox_dropped_callback(AppMessageResult reason, void *context) {
-  APP_LOG(APP_LOG_LEVEL_ERROR, "Message dropped!");
-}
-
-static void outbox_failed_callback(DictionaryIterator *iterator, AppMessageResult reason, void *context) {
-  APP_LOG(APP_LOG_LEVEL_ERROR, "Outbox send failed!");
-}
-
-static void outbox_sent_callback(DictionaryIterator *iterator, void *context) {
-  APP_LOG(APP_LOG_LEVEL_INFO, "Outbox send success!");
-}
-
-static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
-  // Get a tm structure
-  time_t temp = time(NULL);  
-  struct tm *utc_tick = gmtime(&temp);
-  
-  // Write the current hours and minutes into a buffer
-  static char s_time_buffer[12];
-  strftime(s_time_buffer, sizeof(s_time_buffer), clock_is_24h_style() ?
-                                          "%H:%M:%S" : "%I:%M:%S", tick_time);
-  // Display this time on the TextLayer
-  text_layer_set_text(s_time_layer, s_time_buffer);
-  
-  // Write the current date into a buffer
-  static char s_date_buffer[12];
-  strftime(s_date_buffer, sizeof(s_date_buffer),  "%m/%d/%Y", tick_time);
-  // Display this time on the TextLayer
-  text_layer_set_text(s_date_layer, s_date_buffer);
-  
-  static char s_utc_buffer[2];
-  strftime(s_utc_buffer, sizeof(s_utc_buffer), "%H", utc_tick);
-  
-  static char s_day_buffer[12];
-  strftime(s_day_buffer, sizeof(s_day_buffer),  "%A", tick_time);
-  text_layer_set_text(s_day_layer, s_day_buffer);
-  
-}
-
-static void sendUpdate(int key) {
-    DictionaryIterator *iter;
-    dict_write_uint8(iter, key, 0);
-    app_message_outbox_begin(&iter);
-    app_message_outbox_send();
-}
-
-static void updateWeather(void *data) {
-	sendUpdate(CS_UPDATE_WEATHER_KEY);
-	if (!weatherHandle) {
-		weatherHandle = app_timer_register(900000, updateWeather, NULL);
-		APP_LOG(APP_LOG_LEVEL_INFO, "Weather Timer Set");
-	} else if (app_timer_reschedule(weatherHandle, 900000)) {
-		APP_LOG(APP_LOG_LEVEL_INFO, "Weather Timer Reset");
-	}
-}
-
-static void updateBattery(void *data) {
-	sendUpdate(CS_UPDATE_BATTERY_KEY);
-}
-
-static void updateStock(void *data) {
-	sendUpdate(CS_UPDATE_WEATHER_KEY);
-	if (!weatherHandle) {
-		stockHandle = app_timer_register(900000, updateStock, NULL);
-		APP_LOG(APP_LOG_LEVEL_INFO, "Stock Timer Set");
-	} else if (app_timer_reschedule(stockHandle, 900000)) {
-		APP_LOG(APP_LOG_LEVEL_INFO, "Stock Timer Reset");
-	}
-	
-}
-
-static void bt_handler(bool connected) {
-  if (connected) {
-    APP_LOG(APP_LOG_LEVEL_INFO, "Phone is connected!");
-    bitmap_layer_set_bitmap(s_bticon_layer, s_bticon_con_bitmap);
-  } else {
-    APP_LOG(APP_LOG_LEVEL_INFO, "Phone is not connected!");
-    bitmap_layer_set_bitmap(s_bticon_layer, s_bticon_nc_bitmap);
-    // Issue a vibrating alert
-    vibes_double_pulse();
-  }
-}
 
 static void battery_handler(BatteryChargeState charge_state) {
     static char level[5];
@@ -182,15 +73,13 @@ static void battery_handler(BatteryChargeState charge_state) {
 		default:
 			break;
 	};
-    //bitmap_layer_set_bitmap(s_baticon_layer, s_baticon_100_bitmap);
 }
 
-static void phone_battery_handler(float charge_level) {
-    static char level[5];
-    snprintf(level, sizeof(level), "%1.0f", (float)charge_level * 100);
-    APP_LOG(APP_LOG_LEVEL_INFO, "BatteryStateChange. Level = %s", level);
+static void phone_battery_handler(int charge_level) {
     
-	switch ((int)level) {
+    APP_LOG(APP_LOG_LEVEL_INFO, "BatteryStateChange. Level = %d", charge_level);
+    
+	switch ((int)charge_level) {
 		case 0:
 			bitmap_layer_set_bitmap(s_pbaticon_layer, s_baticon_00_bitmap);
 			break;
@@ -227,8 +116,120 @@ static void phone_battery_handler(float charge_level) {
 		default:
 			break;
 	};
-    //bitmap_layer_set_bitmap(s_baticon_layer, s_baticon_100_bitmap);
 }    
+
+static void sendUpdate(int key) {
+    DictionaryIterator *iter;
+    dict_write_uint8(iter, key, 0);
+    app_message_outbox_begin(&iter);
+    app_message_outbox_send();
+}
+
+static void updateWeather(void *data) {
+	sendUpdate(CS_UPDATE_WEATHER_KEY);
+	if (!weatherHandle) {
+		weatherHandle = app_timer_register(900000, updateWeather, NULL);
+		APP_LOG(APP_LOG_LEVEL_INFO, "Weather Timer Set");
+	} else if (app_timer_reschedule(weatherHandle, 900000)) {
+		APP_LOG(APP_LOG_LEVEL_INFO, "Weather Timer Reset");
+	}
+}
+
+static void updateBattery(void *data) {
+	sendUpdate(CS_UPDATE_BATTERY_KEY);
+}
+
+static void updateStock(void *data) {
+	sendUpdate(CS_UPDATE_WEATHER_KEY);
+	if (!weatherHandle) {
+		stockHandle = app_timer_register(900000, updateStock, NULL);
+		APP_LOG(APP_LOG_LEVEL_INFO, "Stock Timer Set");
+	} else if (app_timer_reschedule(stockHandle, 900000)) {
+		APP_LOG(APP_LOG_LEVEL_INFO, "Stock Timer Reset");
+	}
+	
+}
+
+
+static void inbox_received_callback(DictionaryIterator *iterator, void *context) {
+  // Store incoming information
+  static char temperature_buffer[8];
+  static char conditions_buffer[32];
+  static char weather_layer_buffer[32];
+  // Read tuples for data
+  Tuple *temp_tuple = dict_find(iterator, CS_WEATHER_TEMP_F_KEY);
+  Tuple *conditions_tuple = dict_find(iterator, CS_WEATHER_COND_KEY);
+
+  // If all data is available, use it
+  if(temp_tuple && conditions_tuple) {
+    snprintf(temperature_buffer, sizeof(temperature_buffer), "%d°F", (int)temp_tuple->value->int32);
+    snprintf(conditions_buffer, sizeof(conditions_buffer), "%s", conditions_tuple->value->cstring);
+
+    // Assemble full string and display
+    snprintf(weather_layer_buffer, sizeof(weather_layer_buffer), "%s, %s", temperature_buffer, conditions_buffer);
+    text_layer_set_text(s_weather_layer, weather_layer_buffer);
+  }
+  
+  Tuple *battery_tuple = dict_find(iterator, CS_BATTERY_LEVEL_KEY);
+  
+  if(battery_tuple) {
+  	APP_LOG(APP_LOG_LEVEL_INFO, "Phone Battery Level: %f", (float)battery_tuple->value->cstring);
+  	phone_battery_handler((float)battery_tuple->value->cstring);
+  }	 
+}
+
+static void inbox_dropped_callback(AppMessageResult reason, void *context) {
+  APP_LOG(APP_LOG_LEVEL_ERROR, "Message dropped!");
+}
+
+static void outbox_failed_callback(DictionaryIterator *iterator, AppMessageResult reason, void *context) {
+  APP_LOG(APP_LOG_LEVEL_ERROR, "Outbox send failed!");
+}
+
+static void outbox_sent_callback(DictionaryIterator *iterator, void *context) {
+  APP_LOG(APP_LOG_LEVEL_INFO, "Outbox send success!");
+}
+
+static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
+  // Get a tm structure
+  time_t temp = time(NULL);  
+  struct tm *utc_tick = gmtime(&temp);
+  
+  // Write the current hours and minutes into a buffer
+  static char s_time_buffer[12];
+  strftime(s_time_buffer, sizeof(s_time_buffer), clock_is_24h_style() ?
+                                          "%H:%M:%S" : "%I:%M:%S", tick_time);
+  // Display this time on the TextLayer
+  text_layer_set_text(s_time_layer, s_time_buffer);
+  
+  // Write the current date into a buffer
+  static char s_date_buffer[12];
+  strftime(s_date_buffer, sizeof(s_date_buffer),  "%m/%d/%Y", tick_time);
+  // Display this time on the TextLayer
+  text_layer_set_text(s_date_layer, s_date_buffer);
+  
+  static char s_utc_buffer[2];
+  strftime(s_utc_buffer, sizeof(s_utc_buffer), "%H", utc_tick);
+  
+  static char s_day_buffer[12];
+  strftime(s_day_buffer, sizeof(s_day_buffer),  "%A", tick_time);
+  text_layer_set_text(s_day_layer, s_day_buffer);
+  
+}
+
+
+static void bt_handler(bool connected) {
+  if (connected) {
+    APP_LOG(APP_LOG_LEVEL_INFO, "Phone is connected!");
+    bitmap_layer_set_bitmap(s_bticon_layer, s_bticon_con_bitmap);
+  } else {
+    APP_LOG(APP_LOG_LEVEL_INFO, "Phone is not connected!");
+    bitmap_layer_set_bitmap(s_bticon_layer, s_bticon_nc_bitmap);
+    // Issue a vibrating alert
+    vibes_double_pulse();
+  }
+}
+
 /*static void set_bat_icon_color() {
 	s_baticon_00_bitmap = gbitmap_create_with_resource(RESOURCE_ID_BAT_COLOR_00);
 	s_baticon_10_bitmap = gbitmap_create_with_resource(RESOURCE_ID_BAT_COLOR_10);
