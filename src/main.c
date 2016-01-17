@@ -120,8 +120,8 @@ static void phone_battery_handler(int charge_level) {
 
 static void sendUpdate(int key) {
     DictionaryIterator *iter;
-    dict_write_uint8(iter, key, 0);
     app_message_outbox_begin(&iter);
+    dict_write_uint8(iter, key, 0);
     app_message_outbox_send();
 }
 
