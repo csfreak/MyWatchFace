@@ -1,7 +1,18 @@
 #include <pebble.h>
 
-#define KEY_TEMPERATURE 0
-#define KEY_CONDITIONS 1
+#define CS_BATTERY_LEVEL_KEY 0xFFFF
+#define CS_BATTERY_STATUS_KEY 0xFFFE
+#define CS_STOCK_TICKER_KEY 0xFFEF
+#define CS_STOCK_VALUE_KEY 0xFFEF
+#define CS_WEATHER_TEMP_F_KEY 0xFFDF
+#define CS_WEATHER_TEMP_C_KEY 0xFFDE
+#define CS_WEATHER_COND_KEY 0xFFDD
+#define CS_WEATHER_HUMID_KEY 0xFFDC
+#define CS_WEATHER_WIND_SPEED_KEY 0xFFDB
+#define CS_WEATHER_WIND_DIR_KEY 0xFFDA
+#define CS_UPDATE_BATTERY_KEY 0x0FFF
+#define CS_UPDATE_STOCK_KEY 0x0FFE
+#define CS_UPDATE_WEATHER_KEY 0x0FFD
 
 static Window *s_main_window;
 static TextLayer *s_time_layer, *s_weather_layer, *s_date_layer, *s_day_layer;
@@ -17,6 +28,8 @@ static GBitmap *s_bticon_con_bitmap, *s_bticon_nc_bitmap, *s_baticon_00_bitmap,
 
 static GFont s_time_font, s_weather_font, s_other_font;
 
+static AppTimer *weatherHandle, *stockHandle, *batteryHandle;
+
 static void inbox_received_callback(DictionaryIterator *iterator, void *context) {
   // Store incoming information
   static char temperature_buffer[8];
@@ -24,8 +37,8 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
   static char weather_layer_buffer[32];
   static char battery_buffer[8];
   // Read tuples for data
-  Tuple *temp_tuple = dict_find(iterator, KEY_TEMPERATURE);
-  Tuple *conditions_tuple = dict_find(iterator, KEY_CONDITIONS);
+  Tuple *temp_tuple = dict_find(iterator, CS_WEATHER_TEMP_F_KEY);
+  Tuple *conditions_tuple = dict_find(iterator, CS_WEATHER_COND_KEY);
 
   // If all data is available, use it
   if(temp_tuple && conditions_tuple) {
@@ -56,23 +69,19 @@ static void outbox_sent_callback(DictionaryIterator *iterator, void *context) {
   APP_LOG(APP_LOG_LEVEL_INFO, "Outbox send success!");
 }
 
-static void update_time() {
+static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
   // Get a tm structure
   time_t temp = time(NULL);  
   struct tm *tick_time = localtime(&temp);
-
+  struct tm *utc_tick = gmtime(&temp);
+  
   // Write the current hours and minutes into a buffer
   static char s_time_buffer[12];
   strftime(s_time_buffer, sizeof(s_time_buffer), clock_is_24h_style() ?
                                           "%H:%M:%S" : "%I:%M:%S", tick_time);
   // Display this time on the TextLayer
   text_layer_set_text(s_time_layer, s_time_buffer);
-}
-static void update_hourly() {
-  time_t temp = time(NULL); 
-  struct tm *tick_time = localtime(&temp);
-  struct tm *utc_tick = gmtime(&temp);
-
+  
   // Write the current date into a buffer
   static char s_date_buffer[12];
   strftime(s_date_buffer, sizeof(s_date_buffer),  "%m/%d/%Y", tick_time);
@@ -85,27 +94,20 @@ static void update_hourly() {
   static char s_day_buffer[12];
   strftime(s_day_buffer, sizeof(s_day_buffer),  "%A", tick_time);
   text_layer_set_text(s_day_layer, s_day_buffer);
-}
-
-static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
-  update_time();
   
-  if((tick_time->tm_min == 0) && (tick_time->tm_sec == 0)) {
-    update_hourly();
-  }
-  // Get weather update every 30 minutes
-  if((tick_time->tm_min % 15 == 0) && (tick_time->tm_sec == 0)) {
-    // Begin dictionary
-    DictionaryIterator *iter;
-    app_message_outbox_begin(&iter);
-
-    // Add a key-value pair
-    dict_write_uint8(iter, 0, 0);
-
-    // Send the message!
-    app_message_outbox_send();
-  }
 }
+
+static void sendUpdate(int key) {
+    DictionaryIterator *iter;
+    dict_write_uint8(iter, key, 0);
+    app_message_outbox_begin(&iter);
+    app_message_outbox_send();
+}
+
+static void updateWeather() {
+	sendUpdate(CS_UPDATE_WEATHER_KEY);
+	if (
+	AppTimer * app_timer_register(uint32_t 900000, AppTimerCallback updateWeather(), void)
 
 static void bt_handler(bool connected) {
   if (connected) {
@@ -205,43 +207,11 @@ static void set_bat_icon() {
 	s_baticon_90_bitmap = gbitmap_create_with_resource(PBL_IF_COLOR_ELSE(RESOURCE_ID_BAT_COLOR_90,RESOURCE_ID_BAT_MONO_90));
 	s_baticon_100_bitmap = gbitmap_create_with_resource(PBL_IF_COLOR_ELSE(RESOURCE_ID_BAT_COLOR_100,RESOURCE_ID_BAT_MONO_100));
 }
-static void main_window_load(Window *window) {
-  // Get information about the Window
-  Layer *window_layer = window_get_root_layer(window);
-  GRect bounds = layer_get_bounds(window_layer);
 
-  // Create GBitmap
-  s_bticon_con_bitmap = gbitmap_create_with_resource(RESOURCE_ID_BITMAP_BT_COLOR_CON);
-  s_bticon_nc_bitmap = gbitmap_create_with_resource(PBL_IF_COLOR_ELSE(RESOURCE_ID_BITMAP_BT_COLOR_NC,RESOURCE_ID_BITMAP_BT_MONO_NC));
- 
-  //Call function to set gbitmaps from resources based on screen color depth
-  set_bat_icon();
-  //old way didnt work.
-  //PBL_IF_COLOR_ELSE(set_bat_icon_color(), set_bat_icon_mono());
-  
-  // Create BitmapLayer to display the GBitmap
-  s_bticon_layer = bitmap_layer_create(GRect(0, 137, 30, 30));
-  s_baticon_layer = bitmap_layer_create(GRect(bounds.size.w - 20, 137, 20, 30));
-  
-  // Set the bitmap onto the layer and add to the window
-  if (connection_service_peek_pebble_app_connection()) {
-      bitmap_layer_set_bitmap(s_bticon_layer, s_bticon_con_bitmap);
-  } else {
-      bitmap_layer_set_bitmap(s_bticon_layer, s_bticon_nc_bitmap);
-  }
-  
-  //use battery handler to set state on window draw
-  battery_handler(battery_state_service_peek());
-  
-  //Draw Bitmap Layers
-  bitmap_layer_set_compositing_mode(s_bticon_layer, GCompOpSet);
-  layer_add_child(window_layer, bitmap_layer_get_layer(s_bticon_layer));
-  bitmap_layer_set_compositing_mode(s_baticon_layer, GCompOpSet);
-  layer_add_child(window_layer, bitmap_layer_get_layer(s_baticon_layer));
+static void drawDateTime(Layer *root) {
   
   // Create the TextLayer with specific bounds
-  s_time_layer = text_layer_create(
-      GRect(0, 28, bounds.size.w, 45)); 
+  	s_time_layer = text_layer_create(GRect(0, 28, layer_get_bounds(root).size.w, 45)); 
 
   // Improve the layout to be more like a watchface
   text_layer_set_background_color(s_time_layer, GColorWhite);
@@ -250,33 +220,18 @@ static void main_window_load(Window *window) {
   text_layer_set_text_alignment(s_time_layer, GTextAlignmentCenter);
 
   // Create GFont
-  s_time_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_PERFECT_DOS_32));
+  
 
   // Apply to TextLayer
   text_layer_set_font(s_time_layer, s_time_font);
 
   // Add it as a child layer to the Window's root layer
-  layer_add_child(window_layer, text_layer_get_layer(s_time_layer));
-
-  // Create temperature Layer
-  s_weather_layer = text_layer_create(
-      GRect(0, 0, bounds.size.w, 28));
-
-  // Style the text
-  text_layer_set_background_color(s_weather_layer, GColorClear);
-  text_layer_set_text_color(s_weather_layer, GColorWhite);
-  text_layer_set_text_alignment(s_weather_layer, GTextAlignmentCenter);
-  text_layer_set_text(s_weather_layer, "Loading...");
-
-  // Create second custom font, apply it and add to Window
-  s_other_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_PERFECT_DOS_20));
-  s_weather_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_PERFECT_DOS_18));
-  text_layer_set_font(s_weather_layer, s_weather_font);
-  layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_weather_layer));
+  layer_add_child(root, text_layer_get_layer(s_time_layer));
   
+    
    // Create date Layer
   s_date_layer = text_layer_create(
-      GRect(0, 100, bounds.size.w, 30));
+      GRect(0, 100, layer_get_bounds(root).size.w, 30));
 
   // Style the text
   text_layer_set_background_color(s_date_layer, GColorWhite);
@@ -286,11 +241,11 @@ static void main_window_load(Window *window) {
 
   // Create second custom font, apply it and add to Window
   text_layer_set_font(s_date_layer, s_other_font);
-  layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_date_layer));
+  layer_add_child(root, text_layer_get_layer(s_date_layer));
   
      // Create date Layer
   s_day_layer = text_layer_create(
-      GRect(0, 70, bounds.size.w, 30));
+      GRect(0, 70, layer_get_bounds(root).size.w, 30));
 
   // Style the text
   text_layer_set_background_color(s_day_layer, GColorBlack);
@@ -300,7 +255,83 @@ static void main_window_load(Window *window) {
 
   // Create second custom font, apply it and add to Window
   text_layer_set_font(s_day_layer, s_other_font);
-  layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_day_layer));
+  layer_add_child(root, text_layer_get_layer(s_day_layer));
+
+
+}
+static void drawWeather(Layer *root) {
+
+// Create temperature Layer
+  s_weather_layer = text_layer_create(
+      GRect(0, 0, layer_get_bounds(root).size.w, 28));
+
+  // Style the text
+  text_layer_set_background_color(s_weather_layer, GColorClear);
+  text_layer_set_text_color(s_weather_layer, GColorWhite);
+  text_layer_set_text_alignment(s_weather_layer, GTextAlignmentCenter);
+  text_layer_set_text(s_weather_layer, "Loading...");
+
+  // Create second custom font, apply it and add to Window
+  text_layer_set_font(s_weather_layer, s_weather_font);
+  layer_add_child(root, text_layer_get_layer(s_weather_layer));
+
+}
+static void drawBattery(Layer *root) {
+
+ 	//Call function to set gbitmaps from resources based on screen color depth
+  	set_bat_icon();
+  	//old way didnt work.
+  	//PBL_IF_COLOR_ELSE(set_bat_icon_color(), set_bat_icon_mono());
+  
+  	// Create BitmapLayer to display the GBitmap
+  	s_baticon_layer = bitmap_layer_create(GRect(layer_get_bounds(root).size.w - 20, 137, 20, 30));
+  
+  	// Set the bitmap onto the layer and add to the window
+  	if (connection_service_peek_pebble_app_connection()) {
+  	    bitmap_layer_set_bitmap(s_bticon_layer, s_bticon_con_bitmap);
+  	} else {
+  	    bitmap_layer_set_bitmap(s_bticon_layer, s_bticon_nc_bitmap);
+  	}
+  
+  	//use battery handler to set state on window draw
+  	battery_handler(battery_state_service_peek());
+  
+  	//Draw Bitmap Layers
+
+  	bitmap_layer_set_compositing_mode(s_baticon_layer, GCompOpSet);
+  	layer_add_child(root, bitmap_layer_get_layer(s_baticon_layer));
+
+}
+static void drawBT(Layer *root) {
+ 	s_bticon_con_bitmap = gbitmap_create_with_resource(RESOURCE_ID_BITMAP_BT_COLOR_CON);
+  	s_bticon_nc_bitmap = gbitmap_create_with_resource(PBL_IF_COLOR_ELSE(RESOURCE_ID_BITMAP_BT_COLOR_NC,RESOURCE_ID_BITMAP_BT_MONO_NC));
+  
+    s_bticon_layer = bitmap_layer_create(GRect(0, 137, 30, 30));
+    
+    if (connection_service_peek_pebble_app_connection()) {
+      bitmap_layer_set_bitmap(s_bticon_layer, s_bticon_con_bitmap);
+  	} else {
+      bitmap_layer_set_bitmap(s_bticon_layer, s_bticon_nc_bitmap);
+  	}
+  	
+  	bitmap_layer_set_compositing_mode(s_bticon_layer, GCompOpSet);
+  	layer_add_child(root, bitmap_layer_get_layer(s_bticon_layer));
+static void drawStock(Layer *root) {
+}
+
+static void main_window_load(Window *window) {
+  // Get information about the Window
+  Layer *window_layer = window_get_root_layer(window);
+  s_time_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_PERFECT_DOS_32));
+  s_other_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_PERFECT_DOS_20));
+  s_weather_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_PERFECT_DOS_18));
+ 
+  drawBT(window_layer);
+  drawBattery(window_layer);
+  drawWeather(window_layer);
+  drawDateTime(window_layer);
+  
+
 }
 
 static void main_window_unload(Window *window) {
@@ -335,9 +366,7 @@ static void main_window_unload(Window *window) {
   // Destroy weather elements
   fonts_unload_custom_font(s_other_font);
   fonts_unload_custom_font(s_weather_font);
-    
-  connection_service_unsubscribe();
-  battery_state_service_unsubscribe();
+
 }
 
 
@@ -357,9 +386,6 @@ static void init() {
   // Show the Window on the watch, with animated=true
   window_stack_push(s_main_window, true);
 
-  // Make sure the time is displayed from the start
-  update_time();
-  update_hourly();
   // Register with TickTimerService
   tick_timer_service_subscribe(SECOND_UNIT, tick_handler);
   //
@@ -375,11 +401,14 @@ static void init() {
 
   // Open AppMessage
   app_message_open(app_message_inbox_size_maximum(), app_message_outbox_size_maximum());
+  
 }
 
 static void deinit() {
   // Destroy Window
   window_destroy(s_main_window);
+  connection_service_unsubscribe();
+  battery_state_service_unsubscribe();
 }
 
 int main(void) {

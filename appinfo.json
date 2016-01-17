@@ -1,12 +1,4 @@
 {
-    "appKeys": {
-        "KEY_CONDITIONS": 1,
-        "KEY_TEMPERATURE": 0,
-        "KEY_BATTERY": 2
-    },
-    "capabilities": [
-        "location"
-    ],
     "companyName": "CSfreak",
     "longName": "CSfreak Custom Watchface",
     "projectType": "native",
@@ -238,7 +230,7 @@
         "basalt"
     ],
     "uuid": "8883df8b-3b31-47d1-89f2-83f59c9f5e5f",
-    "versionLabel": "1.0",
+    "versionLabel": "2.0",
     "watchapp": {
         "watchface": true
     }
