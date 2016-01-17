@@ -35,7 +35,6 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
   static char temperature_buffer[8];
   static char conditions_buffer[32];
   static char weather_layer_buffer[32];
-  static char battery_buffer[8];
   // Read tuples for data
   Tuple *temp_tuple = dict_find(iterator, CS_WEATHER_TEMP_F_KEY);
   Tuple *conditions_tuple = dict_find(iterator, CS_WEATHER_COND_KEY);
@@ -53,7 +52,8 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
   Tuple *battery_tuple = dict_find(iterator, CS_BATTERY_LEVEL_KEY);
   
   if(battery_tuple) {
-  	APP_LOG(APP_LOG_LEVEL_INFO, "Phone Battery Level: %d", (int)battery_tuple->value->int32);
+  	APP_LOG(APP_LOG_LEVEL_INFO, "Phone Battery Level: %f", (float)battery_tuple->value->float);
+  	phone_battery_handler((float)battery_tuple->value->float);
   }	 
 }
 
@@ -184,7 +184,51 @@ static void battery_handler(BatteryChargeState charge_state) {
 	};
     //bitmap_layer_set_bitmap(s_baticon_layer, s_baticon_100_bitmap);
 }
+
+static void phone_battery_handler(float charge_level) {
+    static char level[5];
+    snprintf(level, sizeof(level), "%1.0f", (float)charge_level * 100);
+    APP_LOG(APP_LOG_LEVEL_INFO, "BatteryStateChange. Level = %s", level);
     
+	switch ((int)charge_state.charge_percent) {
+		case 0:
+			bitmap_layer_set_bitmap(s_pbaticon_layer, s_baticon_00_bitmap);
+			break;
+		case 10:
+			bitmap_layer_set_bitmap(s_pbaticon_layer, s_baticon_10_bitmap);
+			break;
+		case 20:
+			bitmap_layer_set_bitmap(s_pbaticon_layer, s_baticon_20_bitmap);
+			break;
+		case 30:
+			bitmap_layer_set_bitmap(s_pbaticon_layer, s_baticon_30_bitmap);
+			break;
+		case 40:
+			bitmap_layer_set_bitmap(s_pbaticon_layer, s_baticon_40_bitmap);
+			break;
+		case 50:
+			bitmap_layer_set_bitmap(s_pbaticon_layer, s_baticon_50_bitmap);
+			break;
+		case 60:
+			bitmap_layer_set_bitmap(s_pbaticon_layer, s_baticon_60_bitmap);
+			break;
+		case 70:
+			bitmap_layer_set_bitmap(s_pbaticon_layer, s_baticon_70_bitmap);
+			break;
+		case 80:
+			bitmap_layer_set_bitmap(s_pbaticon_layer, s_baticon_80_bitmap);
+			break;
+		case 90:
+			bitmap_layer_set_bitmap(s_pbaticon_layer, s_baticon_90_bitmap);
+			break;
+		case 100:
+			bitmap_layer_set_bitmap(s_pbaticon_layer, s_baticon_100_bitmap);
+			break;
+		default:
+			break;
+	};
+    //bitmap_layer_set_bitmap(s_baticon_layer, s_baticon_100_bitmap);
+}    
 /*static void set_bat_icon_color() {
 	s_baticon_00_bitmap = gbitmap_create_with_resource(RESOURCE_ID_BAT_COLOR_00);
 	s_baticon_10_bitmap = gbitmap_create_with_resource(RESOURCE_ID_BAT_COLOR_10);
@@ -304,23 +348,20 @@ static void drawBattery(Layer *root) {
   
   	// Create BitmapLayer to display the GBitmap
   	s_baticon_layer = bitmap_layer_create(GRect(layer_get_bounds(root).size.w - 20, 137, 20, 30));
-  
-  	// Set the bitmap onto the layer and add to the window
-  	if (connection_service_peek_pebble_app_connection()) {
-  	    bitmap_layer_set_bitmap(s_bticon_layer, s_bticon_con_bitmap);
-  	} else {
-  	    bitmap_layer_set_bitmap(s_bticon_layer, s_bticon_nc_bitmap);
-  	}
-  
+    s_baticon_layer = bitmap_layer_create(GRect(layer_get_bounds(root).size.w - 40, 137, 20, 30));
+
+
   	//use battery handler to set state on window draw
   	battery_handler(battery_state_service_peek());
-  
+  	updateBattery();
   	//Draw Bitmap Layers
 
   	bitmap_layer_set_compositing_mode(s_baticon_layer, GCompOpSet);
   	layer_add_child(root, bitmap_layer_get_layer(s_baticon_layer));
-
+	bitmap_layer_set_compositing_mode(s_pbaticon_layer, GCompOpSet);
+  	layer_add_child(root, bitmap_layer_get_layer(s_pbaticon_layer));
 }
+
 static void drawBT(Layer *root) {
  	s_bticon_con_bitmap = gbitmap_create_with_resource(RESOURCE_ID_BITMAP_BT_COLOR_CON);
   	s_bticon_nc_bitmap = gbitmap_create_with_resource(PBL_IF_COLOR_ELSE(RESOURCE_ID_BITMAP_BT_COLOR_NC,RESOURCE_ID_BITMAP_BT_MONO_NC));
