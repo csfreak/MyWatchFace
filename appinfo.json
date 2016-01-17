@@ -208,7 +208,7 @@
             },
             {
                 "file": "fonts/perfect-dos-vga.ttf",
-                "name": "FONT_PERFECT_DOS_32",
+                "name": "FONT_PERFECT_DOS_18",
                 "targetPlatforms": null,
                 "type": "font"
             },
@@ -221,7 +221,7 @@
             },
             {
                 "file": "fonts/perfect-dos-vga.ttf",
-                "name": "FONT_PERFECT_DOS_18",
+                "name": "FONT_PERFECT_DOS_32",
                 "targetPlatforms": null,
                 "type": "font"
             }
