@@ -1,10 +1,6 @@
 {
-    "appKeys": {},
-    "capabilities": [
-        ""
-    ],
     "companyName": "CSfreak",
-    "longName": "CSfreak Custom Watchface",
+    "longName": "CSfreak IOS Watchface",
     "projectType": "native",
     "resources": {
         "media": [
@@ -228,7 +224,7 @@
         ]
     },
     "sdkVersion": "3",
-    "shortName": "CSfreakFace",
+    "shortName": "CSfreakPebbleFace",
     "targetPlatforms": [
         "aplite",
         "basalt"
