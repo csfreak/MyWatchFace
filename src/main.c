@@ -173,8 +173,8 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
   Tuple *battery_tuple = dict_find(iterator, CS_BATTERY_LEVEL_KEY);
   
   if(battery_tuple) {
-  	APP_LOG(APP_LOG_LEVEL_INFO, "Phone Battery Level: %f", (float)battery_tuple->value->cstring);
-  	phone_battery_handler((float)battery_tuple->value->cstring);
+  	APP_LOG(APP_LOG_LEVEL_INFO, "Phone Battery Level: %d", (int)battery_tuple->value->int32);
+  	phone_battery_handler((int)battery_tuple->value->int32);
   }	 
 }
 
