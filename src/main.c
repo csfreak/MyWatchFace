@@ -106,7 +106,7 @@ static void sendUpdate(int key) {
 static void updateWeather(void *data) {
 	sendUpdate(CS_UPDATE_WEATHER_KEY);
 	if (!weatherHandle) {
-		weatherHandle = app_timer_register(900000, AppTimerCallback updateWeather(), void);
+		weatherHandle = app_timer_register(900000, updateWeather(), void);
 		APP_LOG(APP_LOG_LEVEL_INFO, "Weather Timer Set");
 	} else if (app_timer_reschedule(weatherHandle, 900000)) {
 		APP_LOG(APP_LOG_LEVEL_INFO, "Weather Timer Reset");
@@ -120,11 +120,12 @@ static void updateBattery(void *data) {
 static void updateStock(void *data) {
 	sendUpdate(CS_UPDATE_WEATHER_KEY);
 	if (!weatherHandle) {
-		stockHandle = app_timer_register(900000, AppTimerCallback updateStock(), void);
+		stockHandle = app_timer_register(900000, updateStock(), void);
 		APP_LOG(APP_LOG_LEVEL_INFO, "Stock Timer Set");
 	} else if (app_timer_reschedule(stockHandle, 900000)) {
 		APP_LOG(APP_LOG_LEVEL_INFO, "Stock Timer Reset");
 	}
+	
 }
 
 static void bt_handler(bool connected) {
@@ -334,6 +335,8 @@ static void drawBT(Layer *root) {
   	
   	bitmap_layer_set_compositing_mode(s_bticon_layer, GCompOpSet);
   	layer_add_child(root, bitmap_layer_get_layer(s_bticon_layer));
+  }
+  	
 static void drawStock(Layer *root) {
 }
 
