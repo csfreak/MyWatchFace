@@ -106,9 +106,9 @@ static void sendUpdate(int key) {
 static void updateWeather(void *data) {
 	sendUpdate(CS_UPDATE_WEATHER_KEY);
 	if (!weatherHandle) {
-		weatherHandle = app_timer_register(uint32_t 900000, AppTimerCallback updateWeather(), void);
+		weatherHandle = app_timer_register(900000, AppTimerCallback updateWeather(), void);
 		APP_LOG(APP_LOG_LEVEL_INFO, "Weather Timer Set");
-	} else if (app_timer_reschedule(weatherHandle, uint32_t 900000)) {
+	} else if (app_timer_reschedule(weatherHandle, 900000)) {
 		APP_LOG(APP_LOG_LEVEL_INFO, "Weather Timer Reset");
 	}
 }
@@ -120,9 +120,9 @@ static void updateBattery(void *data) {
 static void updateStock(void *data) {
 	sendUpdate(CS_UPDATE_WEATHER_KEY);
 	if (!weatherHandle) {
-		stockHandle = app_timer_register(uint32_t 900000, AppTimerCallback updateStock(), void);
+		stockHandle = app_timer_register(900000, AppTimerCallback updateStock(), void);
 		APP_LOG(APP_LOG_LEVEL_INFO, "Stock Timer Set");
-	} else if (app_timer_reschedule(stockHandle, uint32_t 900000)) {
+	} else if (app_timer_reschedule(stockHandle, 900000)) {
 		APP_LOG(APP_LOG_LEVEL_INFO, "Stock Timer Reset");
 	}
 }
