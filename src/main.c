@@ -52,8 +52,8 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
   Tuple *battery_tuple = dict_find(iterator, CS_BATTERY_LEVEL_KEY);
   
   if(battery_tuple) {
-  	APP_LOG(APP_LOG_LEVEL_INFO, "Phone Battery Level: %f", (float)battery_tuple->value->float);
-  	phone_battery_handler((float)battery_tuple->value->float);
+  	APP_LOG(APP_LOG_LEVEL_INFO, "Phone Battery Level: %f", (float)battery_tuple->value->float_t);
+  	phone_battery_handler((float)battery_tuple->value->float_t);
   }	 
 }
 
@@ -190,7 +190,7 @@ static void phone_battery_handler(float charge_level) {
     snprintf(level, sizeof(level), "%1.0f", (float)charge_level * 100);
     APP_LOG(APP_LOG_LEVEL_INFO, "BatteryStateChange. Level = %s", level);
     
-	switch ((int)charge_state.charge_percent) {
+	switch ((int)level) {
 		case 0:
 			bitmap_layer_set_bitmap(s_pbaticon_layer, s_baticon_00_bitmap);
 			break;
@@ -353,7 +353,7 @@ static void drawBattery(Layer *root) {
 
   	//use battery handler to set state on window draw
   	battery_handler(battery_state_service_peek());
-  	updateBattery();
+  	updateBattery(NULL);
   	//Draw Bitmap Layers
 
   	bitmap_layer_set_compositing_mode(s_baticon_layer, GCompOpSet);
