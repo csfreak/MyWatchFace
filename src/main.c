@@ -28,7 +28,7 @@ static GBitmap *s_bticon_con_bitmap, *s_bticon_nc_bitmap, *s_baticon_00_bitmap,
 
 static GFont s_time_font, s_weather_font, s_other_font;
 
-static AppTimer *weatherHandle, *stockHandle, *batteryHandle;
+static AppTimer *weatherHandle, *stockHandle;
 
 static void inbox_received_callback(DictionaryIterator *iterator, void *context) {
   // Store incoming information
@@ -50,7 +50,7 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
     text_layer_set_text(s_weather_layer, weather_layer_buffer);
   }
   
-  Tuple *battery_tuple = dict_find(iterator, KEY_BATTERY);
+  Tuple *battery_tuple = dict_find(iterator, CS_BATTERY_LEVEL_KEY);
   
   if(battery_tuple) {
   	APP_LOG(APP_LOG_LEVEL_INFO, "Phone Battery Level: %d", (int)battery_tuple->value->int32);
@@ -72,7 +72,6 @@ static void outbox_sent_callback(DictionaryIterator *iterator, void *context) {
 static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
   // Get a tm structure
   time_t temp = time(NULL);  
-  struct tm *tick_time = localtime(&temp);
   struct tm *utc_tick = gmtime(&temp);
   
   // Write the current hours and minutes into a buffer
@@ -104,10 +103,29 @@ static void sendUpdate(int key) {
     app_message_outbox_send();
 }
 
-static void updateWeather() {
+static void updateWeather(void *data) {
 	sendUpdate(CS_UPDATE_WEATHER_KEY);
-	if (
-	AppTimer * app_timer_register(uint32_t 900000, AppTimerCallback updateWeather(), void)
+	if (!weatherHandle) {
+		weatherHandle = app_timer_register(uint32_t 900000, AppTimerCallback updateWeather(), void);
+		APP_LOG(APP_LOG_LEVEL_INFO, "Weather Timer Set");
+	} else if (app_timer_reschedule(weatherHandle, uint32_t 900000)) {
+		APP_LOG(APP_LOG_LEVEL_INFO, "Weather Timer Reset");
+	}
+}
+
+static void updateBattery(void *data) {
+	sendUpdate(CS_UPDATE_BATTERY_KEY);
+}
+
+static void updateStock(void *data) {
+	sendUpdate(CS_UPDATE_WEATHER_KEY);
+	if (!weatherHandle) {
+		stockHandle = app_timer_register(uint32_t 900000, AppTimerCallback updateStock(), void);
+		APP_LOG(APP_LOG_LEVEL_INFO, "Stock Timer Set");
+	} else if (app_timer_reschedule(stockHandle, uint32_t 900000)) {
+		APP_LOG(APP_LOG_LEVEL_INFO, "Stock Timer Reset");
+	}
+}
 
 static void bt_handler(bool connected) {
   if (connected) {
