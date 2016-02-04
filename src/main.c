@@ -349,7 +349,7 @@ static void drawBattery(Layer *root) {
   
   	// Create BitmapLayer to display the GBitmap
   	s_baticon_layer = bitmap_layer_create(GRect(layer_get_bounds(root).size.w - 20, 137, 20, 30));
-    s_baticon_layer = bitmap_layer_create(GRect(layer_get_bounds(root).size.w - 40, 137, 20, 30));
+    s_pbaticon_layer = bitmap_layer_create(GRect(layer_get_bounds(root).size.w - 40, 137, 20, 30));
 
 
   	//use battery handler to set state on window draw
