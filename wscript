@@ -58,5 +58,5 @@ def build(ctx):
             binaries.append({'platform': p, 'app_elf': app_elf})
 
     ctx.set_group('bundle')
-    ctx.pbl_bundle(binaries=binaries, [])
+    ctx.pbl_bundle(binaries=binaries)
     
