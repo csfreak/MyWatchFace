@@ -1,9 +1,9 @@
 #include <pebble.h>
 
-#define CS_BATTERY_LEVEL_KEY 0xFFFF
-#define CS_BATTERY_STATUS_KEY 0xFFFE
+#define CS_BATTERY_LEVEL_KEY 0xFFFE
+#define CS_BATTERY_STATUS_KEY 0xFFFD
 #define CS_STOCK_TICKER_KEY 0xFFEF
-#define CS_STOCK_VALUE_KEY 0xFFEF
+#define CS_STOCK_VALUE_KEY 0xFFEE
 #define CS_WEATHER_TEMP_F_KEY 0xFFDF
 #define CS_WEATHER_TEMP_C_KEY 0xFFDE
 #define CS_WEATHER_COND_KEY 0xFFDD
@@ -29,6 +29,9 @@ static GBitmap *s_bticon_con_bitmap, *s_bticon_nc_bitmap, *s_baticon_00_bitmap,
 static GFont s_time_font, s_weather_font, s_other_font;
 
 static AppTimer *weatherHandle, *stockHandle;
+static char temperature_buffer[8];
+static char conditions_buffer[22];
+static char weather_layer_buffer[32];
 
 
 static void battery_handler(BatteryChargeState charge_state) {
@@ -77,7 +80,7 @@ static void battery_handler(BatteryChargeState charge_state) {
 
 static void phone_battery_handler(int charge_level) {
     
-    APP_LOG(APP_LOG_LEVEL_INFO, "BatteryStateChange. Level = %d", charge_level);
+    APP_LOG(APP_LOG_LEVEL_INFO, "PhoneBatteryStateChange. Level = %d", charge_level);
     
 	switch ((int)charge_level) {
 		case 0:
@@ -123,6 +126,7 @@ static void sendUpdate(int key) {
     app_message_outbox_begin(&iter);
     dict_write_uint8(iter, key, 0);
     app_message_outbox_send();
+    APP_LOG(APP_LOG_LEVEL_INFO, "Sent Something");
 }
 
 static void updateWeather(void *data) {
@@ -152,30 +156,46 @@ static void updateStock(void *data) {
 
 
 static void inbox_received_callback(DictionaryIterator *iterator, void *context) {
-  // Store incoming information
-  static char temperature_buffer[8];
-  static char conditions_buffer[32];
-  static char weather_layer_buffer[32];
-  // Read tuples for data
-  Tuple *temp_tuple = dict_find(iterator, CS_WEATHER_TEMP_F_KEY);
-  Tuple *conditions_tuple = dict_find(iterator, CS_WEATHER_COND_KEY);
+	//APP_LOG(APP_LOG_LEVEL_DEBUG, "Received Something");
+	Tuple *tuple = dict_read_first(iterator);
+	// Store incoming information
 
-  // If all data is available, use it
-  if(temp_tuple && conditions_tuple) {
-    snprintf(temperature_buffer, sizeof(temperature_buffer), "%s°F", temp_tuple->value->cstring);
-    snprintf(conditions_buffer, sizeof(conditions_buffer), "%s", conditions_tuple->value->cstring);
+	while (tuple) {
+ 		switch (tuple->key) {
+    		case CS_WEATHER_TEMP_F_KEY:
+    			APP_LOG(APP_LOG_LEVEL_INFO, "Received Weather Data, Temp: %s", tuple->value->cstring);
+     	 		snprintf(temperature_buffer, sizeof(temperature_buffer), "%s°F", tuple->value->cstring);
+     	 		snprintf(weather_layer_buffer, sizeof(weather_layer_buffer), "%s, %s", temperature_buffer, conditions_buffer);
+    			text_layer_set_text(s_weather_layer, weather_layer_buffer);
+      			break;
+    		case CS_WEATHER_COND_KEY:
+    			APP_LOG(APP_LOG_LEVEL_INFO, "Received Weather Data, Condition: %s", tuple->value->cstring);
+      			snprintf(conditions_buffer, sizeof(conditions_buffer), "%s", tuple->value->cstring);
+      			snprintf(weather_layer_buffer, sizeof(weather_layer_buffer), "%s, %s", temperature_buffer, conditions_buffer);
+    			text_layer_set_text(s_weather_layer, weather_layer_buffer);
+      			break;
+      		case CS_WEATHER_TEMP_C_KEY:
+      			APP_LOG(APP_LOG_LEVEL_INFO, "Received Weather Data, Temp C: %s", tuple->value->cstring);
+      			break;
+      		case CS_WEATHER_HUMID_KEY:
+      			APP_LOG(APP_LOG_LEVEL_INFO, "Received Weather Data, Humidity: %s", tuple->value->cstring);
+      			break;	
+      		case CS_BATTERY_LEVEL_KEY:
+      			APP_LOG(APP_LOG_LEVEL_INFO, "Received Battery Data, Level: %d", (int)tuple->value->int32);
+				phone_battery_handler((int)tuple->value->int32);
+				break;
+			case CS_BATTERY_STATUS_KEY:
+      			APP_LOG(APP_LOG_LEVEL_INFO, "Received Battery Data, STATUS: %d", (int)tuple->value->int8);
+				break;
+			default:
+				APP_LOG(APP_LOG_LEVEL_ERROR, "Received Unknown Key %d with value %s or %d", (int)tuple->key, tuple->value->cstring, (int)tuple->value->int32);
+				break;
+  		}
+  		tuple = dict_read_next(iterator);
+	}
+	
 
-    // Assemble full string and display
-    snprintf(weather_layer_buffer, sizeof(weather_layer_buffer), "%s, %s", temperature_buffer, conditions_buffer);
-    text_layer_set_text(s_weather_layer, weather_layer_buffer);
-  }
-  
-  Tuple *battery_tuple = dict_find(iterator, CS_BATTERY_LEVEL_KEY);
-  
-  if(battery_tuple) {
-  	APP_LOG(APP_LOG_LEVEL_INFO, "Phone Battery Level: %d", (int)battery_tuple->value->int32);
-  	phone_battery_handler((int)battery_tuple->value->int32);
-  }	 
+  	 
 }
 
 static void inbox_dropped_callback(AppMessageResult reason, void *context) {
