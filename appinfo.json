@@ -1,5 +1,10 @@
 {
+    "appKeys": {},
+    "capabilities": [
+        ""
+    ],
     "companyName": "CSfreak",
+    "enableMultiJS": true,
     "longName": "CSfreak IOS Watchface",
     "projectType": "native",
     "resources": {
@@ -204,6 +209,12 @@
             },
             {
                 "file": "fonts/perfect-dos-vga.ttf",
+                "name": "FONT_PERFECT_DOS_14",
+                "targetPlatforms": null,
+                "type": "font"
+            },
+            {
+                "file": "fonts/perfect-dos-vga.ttf",
                 "name": "FONT_PERFECT_DOS_18",
                 "targetPlatforms": null,
                 "type": "font"
@@ -229,7 +240,7 @@
         "aplite",
         "basalt"
     ],
-    "uuid": "325fdc12-bf67-48fa-a571-83876880ef88",
+    "uuid": "3c050add-7663-453d-a05a-c9ee836c04d1",
     "versionLabel": "2.0",
     "watchapp": {
         "watchface": true
