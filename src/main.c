@@ -181,8 +181,8 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
       			APP_LOG(APP_LOG_LEVEL_INFO, "Received Weather Data, Humidity: %s", tuple->value->cstring);
       			break;	
       		case CS_BATTERY_LEVEL_KEY:
-      			APP_LOG(APP_LOG_LEVEL_INFO, "Received Battery Data, Level: %d", (int)tuple->value->int32);
-				phone_battery_handler((int)tuple->value->int32);
+      			APP_LOG(APP_LOG_LEVEL_INFO, "Received Battery Data, Level: %d", (int)tuple->value->int32*10);
+				phone_battery_handler((int)tuple->value->int32*10);
 				break;
 			case CS_BATTERY_STATUS_KEY:
       			APP_LOG(APP_LOG_LEVEL_INFO, "Received Battery Data, STATUS: %d", (int)tuple->value->int8);
