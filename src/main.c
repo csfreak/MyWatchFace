@@ -156,6 +156,8 @@ static void updateStock(void *data) {
 
 
 static void inbox_received_callback(DictionaryIterator *iterator, void *context) {
+	//Verify that Battery state shows correctly.
+	battery_handler(battery_state_service_peek());
 	//APP_LOG(APP_LOG_LEVEL_DEBUG, "Received Something");
 	Tuple *tuple = dict_read_first(iterator);
 	// Store incoming information
