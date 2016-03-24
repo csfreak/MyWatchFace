@@ -34,6 +34,26 @@ static char conditions_buffer[22];
 static char weather_layer_buffer[32];
 
 
+char *translate_error(AppMessageResult result) {
+  switch (result) {
+    case APP_MSG_OK: return "APP_MSG_OK";
+    case APP_MSG_SEND_TIMEOUT: return "APP_MSG_SEND_TIMEOUT";
+    case APP_MSG_SEND_REJECTED: return "APP_MSG_SEND_REJECTED";
+    case APP_MSG_NOT_CONNECTED: return "APP_MSG_NOT_CONNECTED";
+    case APP_MSG_APP_NOT_RUNNING: return "APP_MSG_APP_NOT_RUNNING";
+    case APP_MSG_INVALID_ARGS: return "APP_MSG_INVALID_ARGS";
+    case APP_MSG_BUSY: return "APP_MSG_BUSY";
+    case APP_MSG_BUFFER_OVERFLOW: return "APP_MSG_BUFFER_OVERFLOW";
+    case APP_MSG_ALREADY_RELEASED: return "APP_MSG_ALREADY_RELEASED";
+    case APP_MSG_CALLBACK_ALREADY_REGISTERED: return "APP_MSG_CALLBACK_ALREADY_REGISTERED";
+    case APP_MSG_CALLBACK_NOT_REGISTERED: return "APP_MSG_CALLBACK_NOT_REGISTERED";
+    case APP_MSG_OUT_OF_MEMORY: return "APP_MSG_OUT_OF_MEMORY";
+    case APP_MSG_CLOSED: return "APP_MSG_CLOSED";
+    case APP_MSG_INTERNAL_ERROR: return "APP_MSG_INTERNAL_ERROR";
+    default: return "UNKNOWN ERROR";
+  }
+}
+
 static void battery_handler(BatteryChargeState charge_state) {
     static char level[5];
     snprintf(level, sizeof(level), "%d", (int)charge_state.charge_percent);
@@ -126,7 +146,7 @@ static void sendUpdate(int key) {
     app_message_outbox_begin(&iter);
     dict_write_uint8(iter, key, 0);
     app_message_outbox_send();
-    APP_LOG(APP_LOG_LEVEL_INFO, "Sent Something");
+    APP_LOG(APP_LOG_LEVEL_INFO, "Sent %d", key);
 }
 
 static void updateWeather(void *data) {
@@ -144,7 +164,7 @@ static void updateBattery(void *data) {
 }
 
 static void updateStock(void *data) {
-	sendUpdate(CS_UPDATE_WEATHER_KEY);
+	sendUpdate(CS_UPDATE_STOCK_KEY);
 	if (!weatherHandle) {
 		stockHandle = app_timer_register(900000, updateStock, NULL);
 		APP_LOG(APP_LOG_LEVEL_INFO, "Stock Timer Set");
@@ -201,11 +221,14 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
 }
 
 static void inbox_dropped_callback(AppMessageResult reason, void *context) {
-  APP_LOG(APP_LOG_LEVEL_ERROR, "Message dropped!");
+  APP_LOG(APP_LOG_LEVEL_ERROR, "Message dropped: %s", translate_error(reason));
 }
 
 static void outbox_failed_callback(DictionaryIterator *iterator, AppMessageResult reason, void *context) {
-  APP_LOG(APP_LOG_LEVEL_ERROR, "Outbox send failed!");
+  APP_LOG(APP_LOG_LEVEL_ERROR, "Outbox send failed: %s", translate_error(reason));
+  Tuple *tuple = dict_read_first(iterator);
+  // Store incoming information
+  sendUpdate(tuple->key);
 }
 
 static void outbox_sent_callback(DictionaryIterator *iterator, void *context) {
@@ -376,7 +399,6 @@ static void drawBattery(Layer *root) {
 
   	//use battery handler to set state on window draw
   	battery_handler(battery_state_service_peek());
-  	updateBattery(NULL);
   	//Draw Bitmap Layers
 
   	bitmap_layer_set_compositing_mode(s_baticon_layer, GCompOpSet);
@@ -415,7 +437,6 @@ static void main_window_load(Window *window) {
   drawBattery(window_layer);
   drawWeather(window_layer);
   drawDateTime(window_layer);
-  
 
 }
 
@@ -486,7 +507,11 @@ static void init() {
 
   // Open AppMessage
   app_message_open(app_message_inbox_size_maximum(), app_message_outbox_size_maximum());
-  
+
+  // Update Everything Once
+  updateBattery(NULL);
+  updateStock(NULL);
+  updateWeather(NULL);
 }
 
 static void deinit() {
