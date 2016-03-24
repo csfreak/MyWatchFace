@@ -1,14 +1,6 @@
 {
-    "appKeys": {
-        "KEY_CONDITIONS": 1,
-        "KEY_TEMPERATURE": 0,
-        "KEY_BATTERY": 2
-    },
-    "capabilities": [
-        "location"
-    ],
     "companyName": "CSfreak",
-    "longName": "CSfreak Custom Watchface",
+    "longName": "CSfreak IOS Watchface",
     "projectType": "native",
     "resources": {
         "media": [
@@ -232,13 +224,13 @@
         ]
     },
     "sdkVersion": "3",
-    "shortName": "CSfreakFace",
+    "shortName": "CSfreakPebbleFace",
     "targetPlatforms": [
         "aplite",
         "basalt"
     ],
-    "uuid": "8883df8b-3b31-47d1-89f2-83f59c9f5e5f",
-    "versionLabel": "1.0",
+    "uuid": "325fdc12-bf67-48fa-a571-83876880ef88",
+    "versionLabel": "2.0",
     "watchapp": {
         "watchface": true
     }
