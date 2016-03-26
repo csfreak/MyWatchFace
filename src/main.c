@@ -15,7 +15,7 @@
 #define CS_UPDATE_WEATHER_KEY 0x0FFD
 
 static Window *s_main_window;
-static TextLayer *s_time_layer, *s_weather_layer, *s_date_layer, *s_day_layer;
+static TextLayer *s_time_layer, *s_weather_layer, *s_date_layer, *s_day_layer, *s_stock_layer;
 
 //static BitmapLayer *s_background_layer;
 //static GBitmap *s_background_bitmap;
@@ -32,6 +32,7 @@ static AppTimer *weatherHandle, *stockHandle;
 static char temperature_buffer[8];
 static char conditions_buffer[22];
 static char weather_layer_buffer[32];
+static char stock_layer_buffer[22];
 
 
 char *translate_error(AppMessageResult result) {
@@ -151,12 +152,12 @@ static void sendUpdate(int key) {
 
 static void updateWeather(void *data) {
 	sendUpdate(CS_UPDATE_WEATHER_KEY);
-	if (!weatherHandle) {
-		weatherHandle = app_timer_register(900000, updateWeather, NULL);
-		APP_LOG(APP_LOG_LEVEL_INFO, "Weather Timer Set");
-	} else if (app_timer_reschedule(weatherHandle, 900000)) {
-		APP_LOG(APP_LOG_LEVEL_INFO, "Weather Timer Reset");
+	if (weatherHandle) {
+		app_timer_cancel(weatherHandle); 
+		APP_LOG(APP_LOG_LEVEL_INFO, "Weather Timer Canceled");
 	}
+	weatherHandle = app_timer_register(60000, updateWeather, NULL);
+	APP_LOG(APP_LOG_LEVEL_INFO, "Weather Timer Set");
 }
 
 static void updateBattery(void *data) {
@@ -165,12 +166,12 @@ static void updateBattery(void *data) {
 
 static void updateStock(void *data) {
 	sendUpdate(CS_UPDATE_STOCK_KEY);
-	if (!weatherHandle) {
-		stockHandle = app_timer_register(900000, updateStock, NULL);
-		APP_LOG(APP_LOG_LEVEL_INFO, "Stock Timer Set");
-	} else if (app_timer_reschedule(stockHandle, 900000)) {
-		APP_LOG(APP_LOG_LEVEL_INFO, "Stock Timer Reset");
-	}
+	if (stockHandle) {
+		app_timer_cancel(stockHandle); 
+		APP_LOG(APP_LOG_LEVEL_INFO, "Stock Timer Canceled");
+	}	
+	stockHandle = app_timer_register(610000, updateStock, NULL);
+	APP_LOG(APP_LOG_LEVEL_INFO, "Stock Timer Set");
 	
 }
 
@@ -209,6 +210,11 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
 			case CS_BATTERY_STATUS_KEY:
       			APP_LOG(APP_LOG_LEVEL_INFO, "Received Battery Data, STATUS: %d", (int)tuple->value->int8);
 				break;
+			case CS_STOCK_VALUE_KEY:
+				APP_LOG(APP_LOG_LEVEL_INFO, "Received Battery Data, STATUS: %d", (int)tuple->value->cstring);
+				snprintf(stock_layer_buffer, sizeof(stock_layer_buffer), "%s", tuple->value->cstring);
+    			text_layer_set_text(s_stock_layer, stock_layer_buffer);
+    			break;
 			default:
 				APP_LOG(APP_LOG_LEVEL_ERROR, "Received Unknown Key %d with value %s or %d", (int)tuple->key, tuple->value->cstring, (int)tuple->value->int32);
 				break;
@@ -424,6 +430,16 @@ static void drawBT(Layer *root) {
   }
   	
 static void drawStock(Layer *root) {
+	 s_stock_layer = text_layer_create(
+      GRect(40, 137, 60, 30));
+    text_layer_set_background_color(s_stock_layer, GColorClear);
+  	text_layer_set_text_color(s_stock_layer, GColorWhite);
+  	text_layer_set_text_alignment(s_stock_layer, GTextAlignmentCenter);
+  	text_layer_set_text(s_stock_layer, "Loading...");
+
+  // Create second custom font, apply it and add to Window
+  text_layer_set_font(s_stock_layer, s_weather_font);
+  layer_add_child(root, text_layer_get_layer(s_stock_layer));
 }
 
 static void main_window_load(Window *window) {
@@ -437,6 +453,7 @@ static void main_window_load(Window *window) {
   drawBattery(window_layer);
   drawWeather(window_layer);
   drawDateTime(window_layer);
+  drawStock(window_layer);
 
 }
 
@@ -446,6 +463,7 @@ static void main_window_unload(Window *window) {
   text_layer_destroy(s_weather_layer);
   text_layer_destroy(s_date_layer);
   text_layer_destroy(s_day_layer);
+  text_layer_destroy(s_stock_layer);
   bitmap_layer_destroy(s_bticon_layer);
   bitmap_layer_destroy(s_baticon_layer);
   // Unload GFont
@@ -519,6 +537,8 @@ static void deinit() {
   window_destroy(s_main_window);
   connection_service_unsubscribe();
   battery_state_service_unsubscribe();
+  app_timer_cancel(weatherHandle);
+  app_timer_cancel(stockHandle);
 }
 
 int main(void) {
