@@ -15,7 +15,7 @@
 #define CS_UPDATE_WEATHER_KEY 0x0FFD
 
 static Window *s_main_window;
-static TextLayer *s_time_layer, *s_weather_layer, *s_date_layer, *s_day_layer, *s_stock_layer;
+static TextLayer *s_time_layer, *s_weather_layer, *s_date_layer, *s_day_layer, *s_stock_value_layer, *s_stock_ticker_layer;
 
 //static BitmapLayer *s_background_layer;
 //static GBitmap *s_background_bitmap;
@@ -32,7 +32,9 @@ static AppTimer *weatherHandle, *stockHandle;
 static char temperature_buffer[8];
 static char conditions_buffer[22];
 static char weather_layer_buffer[32];
-static char stock_layer_buffer[22];
+static char stock_value_buffer[22];
+static char stock_ticker_buffer[22];
+
 
 
 char *translate_error(AppMessageResult result) {
@@ -156,7 +158,7 @@ static void updateWeather(void *data) {
 		app_timer_cancel(weatherHandle); 
 		APP_LOG(APP_LOG_LEVEL_INFO, "Weather Timer Canceled");
 	}
-	weatherHandle = app_timer_register(60000, updateWeather, NULL);
+	weatherHandle = app_timer_register(900000, updateWeather, NULL);
 	APP_LOG(APP_LOG_LEVEL_INFO, "Weather Timer Set");
 }
 
@@ -170,7 +172,7 @@ static void updateStock(void *data) {
 		app_timer_cancel(stockHandle); 
 		APP_LOG(APP_LOG_LEVEL_INFO, "Stock Timer Canceled");
 	}	
-	stockHandle = app_timer_register(610000, updateStock, NULL);
+	stockHandle = app_timer_register(900000, updateStock, NULL);
 	APP_LOG(APP_LOG_LEVEL_INFO, "Stock Timer Set");
 	
 }
@@ -211,9 +213,14 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
       			APP_LOG(APP_LOG_LEVEL_INFO, "Received Battery Data, STATUS: %d", (int)tuple->value->int8);
 				break;
 			case CS_STOCK_VALUE_KEY:
-				APP_LOG(APP_LOG_LEVEL_INFO, "Received Battery Data, STATUS: %d", (int)tuple->value->cstring);
-				snprintf(stock_layer_buffer, sizeof(stock_layer_buffer), "%s", tuple->value->cstring);
-    			text_layer_set_text(s_stock_layer, stock_layer_buffer);
+				APP_LOG(APP_LOG_LEVEL_INFO, "Received Stock Data, Value: %s", tuple->value->cstring);
+				snprintf(stock_value_buffer, sizeof(stock_value_buffer), "%s", tuple->value->cstring);
+    			text_layer_set_text(s_stock_value_layer, stock_value_buffer);
+    			break;
+    		case CS_STOCK_TICKER_KEY:
+				APP_LOG(APP_LOG_LEVEL_INFO, "Received Stock Data, Ticker: %s", tuple->value->cstring);
+				snprintf(stock_ticker_buffer, sizeof(stock_ticker_buffer), "%s", tuple->value->cstring);
+    			text_layer_set_text(s_stock_ticker_layer, stock_ticker_buffer);
     			break;
 			default:
 				APP_LOG(APP_LOG_LEVEL_ERROR, "Received Unknown Key %d with value %s or %d", (int)tuple->key, tuple->value->cstring, (int)tuple->value->int32);
@@ -430,16 +437,27 @@ static void drawBT(Layer *root) {
   }
   	
 static void drawStock(Layer *root) {
-	 s_stock_layer = text_layer_create(
-      GRect(40, 137, 60, 30));
-    text_layer_set_background_color(s_stock_layer, GColorClear);
-  	text_layer_set_text_color(s_stock_layer, GColorWhite);
-  	text_layer_set_text_alignment(s_stock_layer, GTextAlignmentCenter);
-  	text_layer_set_text(s_stock_layer, "Loading...");
+	 s_stock_value_layer = text_layer_create(
+      GRect(38, 145, 60, 20));
+    text_layer_set_background_color(s_stock_value_layer, GColorClear);
+  	text_layer_set_text_color(s_stock_value_layer, GColorWhite);
+  	text_layer_set_text_alignment(s_stock_value_layer, GTextAlignmentCenter);
+  	text_layer_set_text(s_stock_value_layer, "XX.XX");
 
   // Create second custom font, apply it and add to Window
-  text_layer_set_font(s_stock_layer, s_weather_font);
-  layer_add_child(root, text_layer_get_layer(s_stock_layer));
+  text_layer_set_font(s_stock_value_layer, s_weather_font);
+  layer_add_child(root, text_layer_get_layer(s_stock_value_layer));
+  
+  	 s_stock_ticker_layer = text_layer_create(
+      GRect(38, 130, 60, 18));
+    text_layer_set_background_color(s_stock_ticker_layer, GColorClear);
+  	text_layer_set_text_color(s_stock_ticker_layer, GColorWhite);
+  	text_layer_set_text_alignment(s_stock_ticker_layer, GTextAlignmentCenter);
+  	text_layer_set_text(s_stock_ticker_layer, "VSAT");
+
+  // Create second custom font, apply it and add to Window
+  text_layer_set_font(s_stock_ticker_layer, s_weather_font);
+  layer_add_child(root, text_layer_get_layer(s_stock_ticker_layer));
 }
 
 static void main_window_load(Window *window) {
@@ -463,7 +481,8 @@ static void main_window_unload(Window *window) {
   text_layer_destroy(s_weather_layer);
   text_layer_destroy(s_date_layer);
   text_layer_destroy(s_day_layer);
-  text_layer_destroy(s_stock_layer);
+  text_layer_destroy(s_stock_value_layer);
+  text_layer_destroy(s_stock_ticker_layer);
   bitmap_layer_destroy(s_bticon_layer);
   bitmap_layer_destroy(s_baticon_layer);
   // Unload GFont
