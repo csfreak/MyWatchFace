@@ -177,6 +177,29 @@ static void updateStock(void *data) {
 	
 }
 
+static void sendUpdateAll() {
+    DictionaryIterator *iter;
+    app_message_outbox_begin(&iter);
+    dict_write_uint8(iter, CS_UPDATE_BATTERY_KEY, 0);
+    dict_write_uint8(iter, CS_UPDATE_WEATHER_KEY, 0);
+    dict_write_uint8(iter, CS_UPDATE_STOCK_KEY, 0);
+    app_message_outbox_send();
+    APP_LOG(APP_LOG_LEVEL_INFO, "Sent ALL");
+    
+    if (stockHandle) {
+		app_timer_cancel(stockHandle); 
+		APP_LOG(APP_LOG_LEVEL_INFO, "Stock Timer Canceled");
+	}	
+	stockHandle = app_timer_register(900000, updateStock, NULL);
+	APP_LOG(APP_LOG_LEVEL_INFO, "Stock Timer Set");
+	if (weatherHandle) {
+		app_timer_cancel(weatherHandle); 
+		APP_LOG(APP_LOG_LEVEL_INFO, "Weather Timer Canceled");
+	}
+	weatherHandle = app_timer_register(900000, updateWeather, NULL);
+	APP_LOG(APP_LOG_LEVEL_INFO, "Weather Timer Set");
+}
+
 
 static void inbox_received_callback(DictionaryIterator *iterator, void *context) {
 	//Verify that Battery state shows correctly.
@@ -396,7 +419,7 @@ static void drawWeather(Layer *root) {
   // Create second custom font, apply it and add to Window
   text_layer_set_font(s_weather_layer, s_weather_font);
   layer_add_child(root, text_layer_get_layer(s_weather_layer));
-
+  
 }
 static void drawBattery(Layer *root) {
 
@@ -458,6 +481,7 @@ static void drawStock(Layer *root) {
   // Create second custom font, apply it and add to Window
   text_layer_set_font(s_stock_ticker_layer, s_weather_font);
   layer_add_child(root, text_layer_get_layer(s_stock_ticker_layer));
+  
 }
 
 static void main_window_load(Window *window) {
@@ -546,9 +570,7 @@ static void init() {
   app_message_open(app_message_inbox_size_maximum(), app_message_outbox_size_maximum());
 
   // Update Everything Once
-  updateBattery(NULL);
-  updateStock(NULL);
-  updateWeather(NULL);
+  sendUpdateAll();
 }
 
 static void deinit() {
