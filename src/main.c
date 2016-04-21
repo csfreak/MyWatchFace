@@ -26,7 +26,7 @@ static GBitmap *s_bticon_con_bitmap, *s_bticon_nc_bitmap, *s_baticon_00_bitmap,
 	*s_baticon_50_bitmap, *s_baticon_60_bitmap, *s_baticon_70_bitmap, *s_baticon_80_bitmap,
 	*s_baticon_90_bitmap, *s_baticon_100_bitmap;
 
-static GFont s_time_font, s_weather_font, s_other_font;
+static GFont s_time_font, s_weather_font, s_other_font, s_date_font;
 
 static AppTimer *weatherHandle, *stockHandle;
 static char temperature_buffer[8];
@@ -295,7 +295,7 @@ static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
   strftime(s_utc_buffer, sizeof(s_utc_buffer), "%H", utc_tick);
 
   static char s_day_buffer[12];
-  strftime(s_day_buffer, sizeof(s_day_buffer),  "%a", tick_time);
+  strftime(s_day_buffer, sizeof(s_day_buffer),  "%A", tick_time);
   text_layer_set_text(s_day_layer, s_day_buffer);
 
 }
@@ -358,12 +358,12 @@ static void set_bat_icon() {
 static void drawDateTime(Layer *root) {
 
   // Create the TextLayer with specific bounds
-  	s_time_layer = text_layer_create(GRect(0, 28, layer_get_bounds(root).size.w - 40, 75));
+  	s_time_layer = text_layer_create(GRect(0, 52, layer_get_bounds(root).size.w, 46));
   // Improve the layout to be more like a watchface
-  text_layer_set_background_color(s_time_layer, GColorWhite);
-  text_layer_set_text_color(s_time_layer, GColorBlack);
+  text_layer_set_background_color(s_time_layer, GColorBlack);
+  text_layer_set_text_color(s_time_layer, GColorWhite);
   text_layer_set_text(s_time_layer, "00:00");
-  text_layer_set_text_alignment(s_time_layer, GTextAlignmentCenter);
+  text_layer_set_text_alignment(s_time_layer, GTextAlignmentLeft);
 
   // Create GFont
 
@@ -374,9 +374,9 @@ static void drawDateTime(Layer *root) {
   layer_add_child(root, text_layer_get_layer(s_time_layer));
 
   // Add second layer
-  s_second_layer = text_layer_create(GRect(layer_get_bounds(root).size.w - 40, 28, 40, 45));
-  text_layer_set_background_color(s_second_layer, GColorWhite);
-  text_layer_set_text_color(s_second_layer, GColorBlack);
+  s_second_layer = text_layer_create(GRect(layer_get_bounds(root).size.w - 30, 73, 30, 24));
+  text_layer_set_background_color(s_second_layer, GColorBlack);
+  text_layer_set_text_color(s_second_layer, GColorWhite);
   text_layer_set_text(s_second_layer, "00");
   text_layer_set_text_alignment(s_second_layer, GTextAlignmentCenter);
   //Font
@@ -386,30 +386,30 @@ static void drawDateTime(Layer *root) {
   layer_add_child(root, text_layer_get_layer(s_second_layer));
    // Create date Layer
   s_date_layer = text_layer_create(
-      GRect(0, 100, layer_get_bounds(root).size.w, 30));
+      GRect(0, 102, layer_get_bounds(root).size.w, 28));
 
   // Style the text
-  text_layer_set_background_color(s_date_layer, GColorWhite);
+  text_layer_set_background_color(s_date_layer, GColorLightGray);
   text_layer_set_text_color(s_date_layer, GColorBlack);
   text_layer_set_text_alignment(s_date_layer, GTextAlignmentCenter);
   text_layer_set_text(s_date_layer, "01/01/1970");
 
   // Create second custom font, apply it and add to Window
-  text_layer_set_font(s_date_layer, s_other_font);
+  text_layer_set_font(s_date_layer, s_date_font);
   layer_add_child(root, text_layer_get_layer(s_date_layer));
 
      // Create date Layer
   s_day_layer = text_layer_create(
-      GRect(layer_get_bounds(root).size.w - 40, 70, 40, 30));
+      GRect(0 , 28, layer_get_bounds(root).size.w, 28));
 
   // Style the text
-  text_layer_set_background_color(s_day_layer, GColorBlack);
-  text_layer_set_text_color(s_day_layer, GColorWhite);
+  text_layer_set_background_color(s_day_layer, GColorLightGray);
+  text_layer_set_text_color(s_day_layer, GColorBlack);
   text_layer_set_text_alignment(s_day_layer, GTextAlignmentCenter);
-  text_layer_set_text(s_day_layer, "Wed");
+  text_layer_set_text(s_day_layer, "Wednesday");
 
   // Create second custom font, apply it and add to Window
-  text_layer_set_font(s_day_layer, s_other_font);
+  text_layer_set_font(s_day_layer, s_date_font);
   layer_add_child(root, text_layer_get_layer(s_day_layer));
 
 
@@ -497,8 +497,9 @@ static void drawStock(Layer *root) {
 static void main_window_load(Window *window) {
   // Get information about the Window
   Layer *window_layer = window_get_root_layer(window);
-  s_time_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_PERFECT_DOS_42));
+  s_time_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_PERFECT_DOS_40));
   s_other_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_PERFECT_DOS_20));
+  s_date_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_PERFECT_DOS_22));
   s_weather_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_PERFECT_DOS_18));
 
   drawBT(window_layer);
@@ -512,6 +513,7 @@ static void main_window_load(Window *window) {
 static void main_window_unload(Window *window) {
   // Destroy TextLayer
   text_layer_destroy(s_time_layer);
+  text_layer_destroy(s_second_layer);
   text_layer_destroy(s_weather_layer);
   text_layer_destroy(s_date_layer);
   text_layer_destroy(s_day_layer);
@@ -542,6 +544,7 @@ static void main_window_unload(Window *window) {
 
   // Destroy weather elements
   fonts_unload_custom_font(s_other_font);
+  fonts_unload_custom_font(s_date_font);
   fonts_unload_custom_font(s_weather_font);
 
 }

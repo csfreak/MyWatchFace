@@ -216,8 +216,15 @@
                 "type": "font"
             },
             {
+                "compatibility": "2.7",
                 "file": "fonts/perfect-dos-vga.ttf",
-                "name": "FONT_PERFECT_DOS_42",
+                "name": "FONT_PERFECT_DOS_22",
+                "targetPlatforms": null,
+                "type": "font"
+            },
+            {
+                "file": "fonts/perfect-dos-vga.ttf",
+                "name": "FONT_PERFECT_DOS_40",
                 "targetPlatforms": null,
                 "type": "font"
             }
