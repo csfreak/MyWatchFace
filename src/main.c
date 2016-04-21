@@ -15,13 +15,13 @@
 #define CS_UPDATE_WEATHER_KEY 0x0FFD
 
 static Window *s_main_window;
-static TextLayer *s_time_layer, *s_weather_layer, *s_date_layer, *s_day_layer, *s_stock_value_layer, *s_stock_ticker_layer;
+static TextLayer *s_time_layer, *s_second_layer, *s_weather_layer, *s_date_layer, *s_day_layer, *s_stock_value_layer, *s_stock_ticker_layer;
 
 //static BitmapLayer *s_background_layer;
 //static GBitmap *s_background_bitmap;
 
 static BitmapLayer *s_bticon_layer, *s_baticon_layer, *s_pbaticon_layer;
-static GBitmap *s_bticon_con_bitmap, *s_bticon_nc_bitmap, *s_baticon_00_bitmap, 
+static GBitmap *s_bticon_con_bitmap, *s_bticon_nc_bitmap, *s_baticon_00_bitmap,
     *s_baticon_10_bitmap, *s_baticon_20_bitmap, *s_baticon_30_bitmap, *s_baticon_40_bitmap,
 	*s_baticon_50_bitmap, *s_baticon_60_bitmap, *s_baticon_70_bitmap, *s_baticon_80_bitmap,
 	*s_baticon_90_bitmap, *s_baticon_100_bitmap;
@@ -61,7 +61,7 @@ static void battery_handler(BatteryChargeState charge_state) {
     static char level[5];
     snprintf(level, sizeof(level), "%d", (int)charge_state.charge_percent);
     APP_LOG(APP_LOG_LEVEL_INFO, "BatteryStateChange. Level = %s", level);
-    
+
 	switch ((int)charge_state.charge_percent) {
 		case 0:
 			bitmap_layer_set_bitmap(s_baticon_layer, s_baticon_00_bitmap);
@@ -102,9 +102,9 @@ static void battery_handler(BatteryChargeState charge_state) {
 }
 
 static void phone_battery_handler(int charge_level) {
-    
+
     APP_LOG(APP_LOG_LEVEL_INFO, "PhoneBatteryStateChange. Level = %d", charge_level);
-    
+
 	switch ((int)charge_level) {
 		case 0:
 			bitmap_layer_set_bitmap(s_pbaticon_layer, s_baticon_00_bitmap);
@@ -142,7 +142,7 @@ static void phone_battery_handler(int charge_level) {
 		default:
 			break;
 	};
-}    
+}
 
 static void sendUpdate(int key) {
     DictionaryIterator *iter;
@@ -155,7 +155,7 @@ static void sendUpdate(int key) {
 static void updateWeather(void *data) {
 	sendUpdate(CS_UPDATE_WEATHER_KEY);
 	if (weatherHandle) {
-		app_timer_cancel(weatherHandle); 
+		app_timer_cancel(weatherHandle);
 		APP_LOG(APP_LOG_LEVEL_INFO, "Weather Timer Canceled");
 	}
 	weatherHandle = app_timer_register(900000, updateWeather, NULL);
@@ -169,12 +169,12 @@ static void updateBattery(void *data) {
 static void updateStock(void *data) {
 	sendUpdate(CS_UPDATE_STOCK_KEY);
 	if (stockHandle) {
-		app_timer_cancel(stockHandle); 
+		app_timer_cancel(stockHandle);
 		APP_LOG(APP_LOG_LEVEL_INFO, "Stock Timer Canceled");
-	}	
+	}
 	stockHandle = app_timer_register(900000, updateStock, NULL);
 	APP_LOG(APP_LOG_LEVEL_INFO, "Stock Timer Set");
-	
+
 }
 
 static void sendUpdateAll() {
@@ -185,15 +185,15 @@ static void sendUpdateAll() {
     dict_write_uint8(iter, CS_UPDATE_STOCK_KEY, 0);
     app_message_outbox_send();
     APP_LOG(APP_LOG_LEVEL_INFO, "Sent ALL");
-    
+
     if (stockHandle) {
-		app_timer_cancel(stockHandle); 
+		app_timer_cancel(stockHandle);
 		APP_LOG(APP_LOG_LEVEL_INFO, "Stock Timer Canceled");
-	}	
+	}
 	stockHandle = app_timer_register(900000, updateStock, NULL);
 	APP_LOG(APP_LOG_LEVEL_INFO, "Stock Timer Set");
 	if (weatherHandle) {
-		app_timer_cancel(weatherHandle); 
+		app_timer_cancel(weatherHandle);
 		APP_LOG(APP_LOG_LEVEL_INFO, "Weather Timer Canceled");
 	}
 	weatherHandle = app_timer_register(900000, updateWeather, NULL);
@@ -227,7 +227,7 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
       			break;
       		case CS_WEATHER_HUMID_KEY:
       			APP_LOG(APP_LOG_LEVEL_INFO, "Received Weather Data, Humidity: %s", tuple->value->cstring);
-      			break;	
+      			break;
       		case CS_BATTERY_LEVEL_KEY:
       			APP_LOG(APP_LOG_LEVEL_INFO, "Received Battery Data, Level: %d", (int)tuple->value->int32*10);
 				phone_battery_handler((int)tuple->value->int32*10);
@@ -251,9 +251,7 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
   		}
   		tuple = dict_read_next(iterator);
 	}
-	
 
-  	 
 }
 
 static void inbox_dropped_callback(AppMessageResult reason, void *context) {
@@ -273,29 +271,32 @@ static void outbox_sent_callback(DictionaryIterator *iterator, void *context) {
 
 static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
   // Get a tm structure
-  time_t temp = time(NULL);  
+  time_t temp = time(NULL);
   struct tm *utc_tick = gmtime(&temp);
-  
+
   // Write the current hours and minutes into a buffer
   static char s_time_buffer[12];
   strftime(s_time_buffer, sizeof(s_time_buffer), clock_is_24h_style() ?
-                                          "%H:%M:%S" : "%I:%M:%S", tick_time);
+                                          "%H:%M" : "%I:%M", tick_time);
   // Display this time on the TextLayer
   text_layer_set_text(s_time_layer, s_time_buffer);
   
+  static char s_sec_buffer[4];
+  strftime(s_sec_buffer, sizeof(s_sec_buffer), "%S", tick_time);
+
   // Write the current date into a buffer
   static char s_date_buffer[12];
   strftime(s_date_buffer, sizeof(s_date_buffer),  "%m/%d/%Y", tick_time);
   // Display this time on the TextLayer
   text_layer_set_text(s_date_layer, s_date_buffer);
-  
+
   static char s_utc_buffer[2];
   strftime(s_utc_buffer, sizeof(s_utc_buffer), "%H", utc_tick);
-  
+
   static char s_day_buffer[12];
-  strftime(s_day_buffer, sizeof(s_day_buffer),  "%A", tick_time);
+  strftime(s_day_buffer, sizeof(s_day_buffer),  "%a", tick_time);
   text_layer_set_text(s_day_layer, s_day_buffer);
-  
+
 }
 
 
@@ -325,7 +326,7 @@ static void bt_handler(bool connected) {
 	s_baticon_100_bitmap = gbitmap_create_with_resource(RESOURCE_ID_BAT_COLOR_100);
 }
 
-static void set_bat_icon_mono() { 
+static void set_bat_icon_mono() {
 	s_baticon_00_bitmap = gbitmap_create_with_resource(RESOURCE_ID_BAT_MONO_00);
 	s_baticon_10_bitmap = gbitmap_create_with_resource(RESOURCE_ID_BAT_MONO_10);
 	s_baticon_20_bitmap = gbitmap_create_with_resource(RESOURCE_ID_BAT_MONO_20);
@@ -354,9 +355,9 @@ static void set_bat_icon() {
 }
 
 static void drawDateTime(Layer *root) {
-  
+
   // Create the TextLayer with specific bounds
-  	s_time_layer = text_layer_create(GRect(0, 28, layer_get_bounds(root).size.w, 45)); 
+  	s_time_layer = text_layer_create(GRect(0, 28, layer_get_bounds(root).size.w, 45));
 
   // Improve the layout to be more like a watchface
   text_layer_set_background_color(s_time_layer, GColorWhite);
@@ -365,15 +366,13 @@ static void drawDateTime(Layer *root) {
   text_layer_set_text_alignment(s_time_layer, GTextAlignmentCenter);
 
   // Create GFont
-  
 
   // Apply to TextLayer
   text_layer_set_font(s_time_layer, s_time_font);
 
   // Add it as a child layer to the Window's root layer
   layer_add_child(root, text_layer_get_layer(s_time_layer));
-  
-    
+
    // Create date Layer
   s_date_layer = text_layer_create(
       GRect(0, 100, layer_get_bounds(root).size.w, 30));
@@ -387,7 +386,7 @@ static void drawDateTime(Layer *root) {
   // Create second custom font, apply it and add to Window
   text_layer_set_font(s_date_layer, s_other_font);
   layer_add_child(root, text_layer_get_layer(s_date_layer));
-  
+
      // Create date Layer
   s_day_layer = text_layer_create(
       GRect(0, 70, layer_get_bounds(root).size.w, 30));
@@ -419,7 +418,7 @@ static void drawWeather(Layer *root) {
   // Create second custom font, apply it and add to Window
   text_layer_set_font(s_weather_layer, s_weather_font);
   layer_add_child(root, text_layer_get_layer(s_weather_layer));
-  
+
 }
 static void drawBattery(Layer *root) {
 
@@ -427,7 +426,7 @@ static void drawBattery(Layer *root) {
   	set_bat_icon();
   	//old way didnt work.
   	//PBL_IF_COLOR_ELSE(set_bat_icon_color(), set_bat_icon_mono());
-  
+
   	// Create BitmapLayer to display the GBitmap
   	s_baticon_layer = bitmap_layer_create(GRect(layer_get_bounds(root).size.w - 20, 137, 20, 30));
     s_pbaticon_layer = bitmap_layer_create(GRect(layer_get_bounds(root).size.w - 40, 137, 20, 30));
@@ -446,19 +445,19 @@ static void drawBattery(Layer *root) {
 static void drawBT(Layer *root) {
  	s_bticon_con_bitmap = gbitmap_create_with_resource(RESOURCE_ID_BITMAP_BT_COLOR_CON);
   	s_bticon_nc_bitmap = gbitmap_create_with_resource(PBL_IF_COLOR_ELSE(RESOURCE_ID_BITMAP_BT_COLOR_NC,RESOURCE_ID_BITMAP_BT_MONO_NC));
-  
+
     s_bticon_layer = bitmap_layer_create(GRect(0, 137, 30, 30));
-    
+
     if (connection_service_peek_pebble_app_connection()) {
       bitmap_layer_set_bitmap(s_bticon_layer, s_bticon_con_bitmap);
   	} else {
       bitmap_layer_set_bitmap(s_bticon_layer, s_bticon_nc_bitmap);
   	}
-  	
+
   	bitmap_layer_set_compositing_mode(s_bticon_layer, GCompOpSet);
   	layer_add_child(root, bitmap_layer_get_layer(s_bticon_layer));
   }
-  	
+
 static void drawStock(Layer *root) {
 	 s_stock_value_layer = text_layer_create(
       GRect(38, 145, 60, 20));
@@ -470,7 +469,7 @@ static void drawStock(Layer *root) {
   // Create second custom font, apply it and add to Window
   text_layer_set_font(s_stock_value_layer, s_weather_font);
   layer_add_child(root, text_layer_get_layer(s_stock_value_layer));
-  
+
   	 s_stock_ticker_layer = text_layer_create(
       GRect(38, 130, 60, 18));
     text_layer_set_background_color(s_stock_ticker_layer, GColorClear);
@@ -481,7 +480,7 @@ static void drawStock(Layer *root) {
   // Create second custom font, apply it and add to Window
   text_layer_set_font(s_stock_ticker_layer, s_weather_font);
   layer_add_child(root, text_layer_get_layer(s_stock_ticker_layer));
-  
+
 }
 
 static void main_window_load(Window *window) {
@@ -490,7 +489,7 @@ static void main_window_load(Window *window) {
   s_time_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_PERFECT_DOS_32));
   s_other_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_PERFECT_DOS_20));
   s_weather_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_PERFECT_DOS_18));
- 
+
   drawBT(window_layer);
   drawBattery(window_layer);
   drawWeather(window_layer);
@@ -526,7 +525,7 @@ static void main_window_unload(Window *window) {
   gbitmap_destroy(s_baticon_80_bitmap);
   gbitmap_destroy(s_baticon_90_bitmap);
   gbitmap_destroy(s_baticon_100_bitmap);
-    
+
   // Destroy BitmapLayer
   //bitmap_layer_destroy(s_background_layer);
 
