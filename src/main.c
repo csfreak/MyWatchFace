@@ -283,7 +283,8 @@ static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
   
   static char s_sec_buffer[4];
   strftime(s_sec_buffer, sizeof(s_sec_buffer), "%S", tick_time);
-
+  text_layer_set_text(s_second_layer, s_sec_buffer);
+  
   // Write the current date into a buffer
   static char s_date_buffer[12];
   strftime(s_date_buffer, sizeof(s_date_buffer),  "%m/%d/%Y", tick_time);
@@ -357,12 +358,11 @@ static void set_bat_icon() {
 static void drawDateTime(Layer *root) {
 
   // Create the TextLayer with specific bounds
-  	s_time_layer = text_layer_create(GRect(0, 28, layer_get_bounds(root).size.w, 45));
-
+  	s_time_layer = text_layer_create(GRect(0, 28, layer_get_bounds(root).size.w - 40, 75));
   // Improve the layout to be more like a watchface
   text_layer_set_background_color(s_time_layer, GColorWhite);
   text_layer_set_text_color(s_time_layer, GColorBlack);
-  text_layer_set_text(s_time_layer, "00:00:00");
+  text_layer_set_text(s_time_layer, "00:00");
   text_layer_set_text_alignment(s_time_layer, GTextAlignmentCenter);
 
   // Create GFont
@@ -373,6 +373,17 @@ static void drawDateTime(Layer *root) {
   // Add it as a child layer to the Window's root layer
   layer_add_child(root, text_layer_get_layer(s_time_layer));
 
+  // Add second layer
+  s_second_layer = text_layer_create(GRect(layer_get_bounds(root).size.w - 40, 28, 40, 45));
+  text_layer_set_background_color(s_second_layer, GColorWhite);
+  text_layer_set_text_color(s_second_layer, GColorBlack);
+  text_layer_set_text(s_second_layer, "00");
+  text_layer_set_text_alignment(s_second_layer, GTextAlignmentCenter);
+  //Font
+  text_layer_set_font(s_second_layer, s_other_font);
+
+  // Add it as a child layer to the Window's root layer
+  layer_add_child(root, text_layer_get_layer(s_second_layer));
    // Create date Layer
   s_date_layer = text_layer_create(
       GRect(0, 100, layer_get_bounds(root).size.w, 30));
@@ -389,13 +400,13 @@ static void drawDateTime(Layer *root) {
 
      // Create date Layer
   s_day_layer = text_layer_create(
-      GRect(0, 70, layer_get_bounds(root).size.w, 30));
+      GRect(layer_get_bounds(root).size.w - 40, 70, 40, 30));
 
   // Style the text
   text_layer_set_background_color(s_day_layer, GColorBlack);
   text_layer_set_text_color(s_day_layer, GColorWhite);
   text_layer_set_text_alignment(s_day_layer, GTextAlignmentCenter);
-  text_layer_set_text(s_day_layer, "Wednesday");
+  text_layer_set_text(s_day_layer, "Wed");
 
   // Create second custom font, apply it and add to Window
   text_layer_set_font(s_day_layer, s_other_font);
