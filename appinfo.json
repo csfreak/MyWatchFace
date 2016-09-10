@@ -1,4 +1,11 @@
 {
+    "appKeys": {
+        "KEY_CONDITIONS": 1,
+        "KEY_TEMPERATURE": 0
+    },
+    "capabilities": [
+        "location"
+    ],
     "companyName": "CSfreak",
     "longName": "CSfreak IOS Watchface",
     "projectType": "native",
