@@ -9,6 +9,26 @@ var xhrRequest = function (url, type, callback) {
   xhr.send();
 };
 
+function getStock(ticker) {
+    var url ="http://download.finance.yahoo.com/d/quotes.csv?s=" + ticker + "&f=l1&e=.csv";
+    xhrRequest(url, 'GET', 
+    function(responseText) {
+        var value = responseText;
+        var dictionary = {
+            "STOCK_VALUE": value
+        };
+        // Send to Pebble
+        Pebble.sendAppMessage(dictionary,
+          function(e) {
+            console.log("Stock info sent to Pebble successfully!");
+          },
+          function(e) {
+            console.log("Error sending stock info to Pebble!");
+          }
+      );
+    });
+}
+
 function locationSuccess(pos) {
   // Construct URL
   var url = "http://api.openweathermap.org/data/2.5/weather?lat=" +
@@ -32,8 +52,8 @@ function locationSuccess(pos) {
       
       // Assemble dictionary using our keys
       var dictionary = {
-        "CS_WEATHER_TEMP_F_KEY": temperature,
-        "CS_WEATHER_COND_KEY": conditions
+        "WEATHER_TEMP": temperature,
+        "WEATHER_COND": conditions
       };
 
       // Send to Pebble
@@ -65,16 +85,22 @@ function getWeather() {
 Pebble.addEventListener('ready', 
   function(e) {
     console.log("PebbleKit JS ready!");
-
     // Get the initial weather
     getWeather();
+    getStock('VSAT');
   }
 );
 
 // Listen for when an AppMessage is received
 Pebble.addEventListener('appmessage',
   function(e) {
+      if(e.payload['UPDATE_WEATHER']) {
+          getWeather();
+      }
+      if(e.payload['UPDATE_STOCK']) {
+          getStock('VSAT');
+      }
     console.log("AppMessage received!");
-    getWeather();
+    
   }                     
 );

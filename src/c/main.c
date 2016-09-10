@@ -1,12 +1,5 @@
 #include <pebble.h>
 
-#define CS_STOCK_TICKER_KEY 0xFFEF
-#define CS_STOCK_VALUE_KEY 0xFFEE
-#define CS_WEATHER_TEMP_F_KEY 0xFFDF
-#define CS_WEATHER_COND_KEY 0xFFDD
-#define CS_UPDATE_STOCK_KEY 0x0FFE
-#define CS_UPDATE_WEATHER_KEY 0x0FFD
-
 static Window *s_main_window;
 static TextLayer *s_time_layer, *s_second_layer, *s_weather_layer, *s_date_layer, *s_day_layer, *s_stock_value_layer, *s_stock_ticker_layer;
 
@@ -103,7 +96,7 @@ static void sendUpdate(int key) {
 }
 
 static void updateWeather(void *data) {
-	sendUpdate(CS_UPDATE_WEATHER_KEY);
+	sendUpdate(MESSAGE_KEY_UPDATE_WEATHER);
 	if (weatherHandle) {
 		app_timer_cancel(weatherHandle);
 		APP_LOG(APP_LOG_LEVEL_INFO, "Weather Timer Canceled");
@@ -113,7 +106,7 @@ static void updateWeather(void *data) {
 }
 
 static void updateStock(void *data) {
-	sendUpdate(CS_UPDATE_STOCK_KEY);
+	sendUpdate(MESSAGE_KEY_UPDATE_STOCK);
 	if (stockHandle) {
 		app_timer_cancel(stockHandle);
 		APP_LOG(APP_LOG_LEVEL_INFO, "Stock Timer Canceled");
@@ -126,8 +119,8 @@ static void updateStock(void *data) {
 static void sendUpdateAll() {
     DictionaryIterator *iter;
     app_message_outbox_begin(&iter);
-    dict_write_uint8(iter, CS_UPDATE_WEATHER_KEY, 0);
-    dict_write_uint8(iter, CS_UPDATE_STOCK_KEY, 0);
+    dict_write_uint8(iter, MESSAGE_KEY_UPDATE_WEATHER, 0);
+    dict_write_uint8(iter, MESSAGE_KEY_UPDATE_STOCK, 0);
     app_message_outbox_send();
     APP_LOG(APP_LOG_LEVEL_INFO, "Sent ALL");
 
@@ -147,43 +140,34 @@ static void sendUpdateAll() {
 
 
 static void inbox_received_callback(DictionaryIterator *iterator, void *context) {
-	//Verify that Battery state shows correctly.
-	battery_handler(battery_state_service_peek());
-	//APP_LOG(APP_LOG_LEVEL_DEBUG, "Received Something");
-	Tuple *tuple = dict_read_first(iterator);
-	// Store incoming information
 
-	while (tuple) {
- 		switch (tuple->key) {
-    		case CS_WEATHER_TEMP_F_KEY:
-    			APP_LOG(APP_LOG_LEVEL_INFO, "Received Weather Data, Temp: %s", tuple->value->cstring);
-     	 		snprintf(temperature_buffer, sizeof(temperature_buffer), "%s°F", tuple->value->cstring);
-     	 		snprintf(weather_layer_buffer, sizeof(weather_layer_buffer), "%s, %s", temperature_buffer, conditions_buffer);
-    			text_layer_set_text(s_weather_layer, weather_layer_buffer);
-      			break;
-    		case CS_WEATHER_COND_KEY:
-    			APP_LOG(APP_LOG_LEVEL_INFO, "Received Weather Data, Condition: %s", tuple->value->cstring);
-      			snprintf(conditions_buffer, sizeof(conditions_buffer), "%s", tuple->value->cstring);
-      			snprintf(weather_layer_buffer, sizeof(weather_layer_buffer), "%s, %s", temperature_buffer, conditions_buffer);
-    			text_layer_set_text(s_weather_layer, weather_layer_buffer);
-      			break;
-			case CS_STOCK_VALUE_KEY:
-				APP_LOG(APP_LOG_LEVEL_INFO, "Received Stock Data, Value: %s", tuple->value->cstring);
-				snprintf(stock_value_buffer, sizeof(stock_value_buffer), "%s", tuple->value->cstring);
-    			text_layer_set_text(s_stock_value_layer, stock_value_buffer);
-    			break;
-    		case CS_STOCK_TICKER_KEY:
-				APP_LOG(APP_LOG_LEVEL_INFO, "Received Stock Data, Ticker: %s", tuple->value->cstring);
-				snprintf(stock_ticker_buffer, sizeof(stock_ticker_buffer), "%s", tuple->value->cstring);
-    			text_layer_set_text(s_stock_ticker_layer, stock_ticker_buffer);
-    			break;
-			default:
-				APP_LOG(APP_LOG_LEVEL_ERROR, "Received Unknown Key %d with value %s or %d", (int)tuple->key, tuple->value->cstring, (int)tuple->value->int32);
-				break;
-  		}
-  		tuple = dict_read_next(iterator);
-	}
+    Tuple *w_temp_tuple = dict_find(iterator, MESSAGE_KEY_WEATHER_TEMP);
+    Tuple *w_cond_tuple = dict_find(iterator, MESSAGE_KEY_WEATHER_COND);
+    Tuple *s_value_tuple = dict_find(iterator, MESSAGE_KEY_STOCK_VALUE);
+    Tuple *s_ticker_tuple = dict_find(iterator, MESSAGE_KEY_STOCK_TICKER);
 
+    if(w_temp_tuple) {
+        APP_LOG(APP_LOG_LEVEL_INFO, "Received Weather Data, Temp: %d", (int)w_temp_tuple->value->int32);
+     	snprintf(temperature_buffer, sizeof(temperature_buffer), "%d°F", (int)w_temp_tuple->value->int32);
+     	snprintf(weather_layer_buffer, sizeof(weather_layer_buffer), "%s, %s", temperature_buffer, conditions_buffer);
+    	text_layer_set_text(s_weather_layer, weather_layer_buffer);
+    }
+    if(w_cond_tuple) {
+    	APP_LOG(APP_LOG_LEVEL_INFO, "Received Weather Data, Condition: %s", w_cond_tuple->value->cstring);
+      	snprintf(conditions_buffer, sizeof(conditions_buffer), "%s", w_cond_tuple->value->cstring);
+      	snprintf(weather_layer_buffer, sizeof(weather_layer_buffer), "%s, %s", temperature_buffer, conditions_buffer);
+    	text_layer_set_text(s_weather_layer, weather_layer_buffer);
+    }
+    if(s_value_tuple) {
+		APP_LOG(APP_LOG_LEVEL_INFO, "Received Stock Data, Value: %s", s_value_tuple->value->cstring);
+		snprintf(stock_value_buffer, sizeof(stock_value_buffer), "%s", s_value_tuple->value->cstring);
+    	text_layer_set_text(s_stock_value_layer, stock_value_buffer);
+    }
+    if(s_ticker_tuple) {
+		APP_LOG(APP_LOG_LEVEL_INFO, "Received Stock Data, Ticker: %s", s_ticker_tuple->value->cstring);
+		snprintf(stock_ticker_buffer, sizeof(stock_ticker_buffer), "%s", s_ticker_tuple->value->cstring);
+    	text_layer_set_text(s_stock_ticker_layer, stock_ticker_buffer);
+    }
 }
 
 static void inbox_dropped_callback(AppMessageResult reason, void *context) {

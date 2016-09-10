@@ -2,21 +2,21 @@
     "author": "CSfreak",
     "dependencies": {},
     "keywords": [],
-    "name": "csfreakpebbleface",
+    "name": "csfreakface",
     "pebble": {
         "capabilities": [
             "location",
             "configurable"
         ],
-        "displayName": "CSfreak IOS Watchface",
-        "enableMultiJS": false,
+        "displayName": "CSfreak Watchface PKJS",
+        "enableMultiJS": true,
         "messageKeys": [
-            "CS_WEATHER_TEMP_F_KEY",
-            "CS_WEATHER_COND_KEY",
-            "CS_STOCK_TICKER_KEY",
-            "CS_STOCK_VALUE_KEY",
-            "CS_UPDATE_STOCK_KEY",
-            "CS_UPDATE_WEATHER_KEY"
+            "WEATHER_TEMP",
+            "WEATHER_COND",
+            "STOCK_TICKER",
+            "STOCK_VALUE",
+            "UPDATE_STOCK",
+            "UPDATE_WEATHER"
         ],
         "projectType": "native",
         "resources": {
