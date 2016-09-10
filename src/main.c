@@ -13,6 +13,8 @@
 #define CS_UPDATE_BATTERY_KEY 0x0FFF
 #define CS_UPDATE_STOCK_KEY 0x0FFE
 #define CS_UPDATE_WEATHER_KEY 0x0FFD
+#define CS_WBATTERY_LEVEL_KEY 0x0FFC
+#define CS_WBATTERY_STATUS_KEY 0x0FFB
 
 static Window *s_main_window;
 static TextLayer *s_time_layer, *s_second_layer, *s_weather_layer, *s_date_layer, *s_day_layer, *s_stock_value_layer, *s_stock_ticker_layer;
@@ -57,11 +59,32 @@ char *translate_error(AppMessageResult result) {
   }
 }
 
-static void battery_handler(BatteryChargeState charge_state) {
-    static char level[5];
-    snprintf(level, sizeof(level), "%d", (int)charge_state.charge_percent);
-    APP_LOG(APP_LOG_LEVEL_INFO, "BatteryStateChange. Level = %s", level);
+static void sendUpdate(int key) {
+    DictionaryIterator *iter;
+    app_message_outbox_begin(&iter);
+    dict_write_uint8(iter, key, 0);
+    app_message_outbox_send();
+    APP_LOG(APP_LOG_LEVEL_INFO, "Sent %d", key);
+}
 
+static void sendInt(int key, int value) {
+    DictionaryIterator *iter;
+    app_message_outbox_begin(&iter);
+    dict_write_uint8(iter, key, value);
+    app_message_outbox_send();
+    APP_LOG(APP_LOG_LEVEL_INFO, "Sent %d", key);
+}
+
+static void sendCString(int key, char *value) {
+    DictionaryIterator *iter;
+    app_message_outbox_begin(&iter);
+    dict_write_cstring(iter, key, value);
+    app_message_outbox_send();
+    APP_LOG(APP_LOG_LEVEL_INFO, "Sent %d with value %s", key, value);
+}
+
+static void battery_handler(BatteryChargeState charge_state) {
+	
 	switch ((int)charge_state.charge_percent) {
 		case 0:
 			bitmap_layer_set_bitmap(s_baticon_layer, s_baticon_00_bitmap);
@@ -99,6 +122,28 @@ static void battery_handler(BatteryChargeState charge_state) {
 		default:
 			break;
 	};
+	static char status[10];
+    
+	if (charge_state.is_charging) {
+		snprintf(status, sizeof(status), "charging");
+	} else if (charge_state.is_plugged) {
+		snprintf(status, sizeof(status), "full");
+	} else {
+		snprintf(status, sizeof(status), "unplugged");
+	}
+	APP_LOG(APP_LOG_LEVEL_INFO, "BatteryStateChange.Status = %s", status);
+	static char level[5];
+    snprintf(level, sizeof(level), "%d", (int)charge_state.charge_percent);
+    APP_LOG(APP_LOG_LEVEL_INFO, "BatteryStateChange.Level = %s", level);
+
+	DictionaryIterator *iter;
+    app_message_outbox_begin(&iter);
+    dict_write_uint8(iter, CS_WBATTERY_LEVEL_KEY, (int)charge_state.charge_percent);
+    dict_write_cstring(iter, CS_WBATTERY_STATUS_KEY, status);
+    app_message_outbox_send();
+    APP_LOG(APP_LOG_LEVEL_INFO, "Sent %d with value %d", CS_WBATTERY_LEVEL_KEY, (int)charge_state.charge_percent);
+    APP_LOG(APP_LOG_LEVEL_INFO, "Sent %d with value %s", CS_WBATTERY_STATUS_KEY, status);
+	
 }
 
 static void phone_battery_handler(int charge_level) {
@@ -144,13 +189,6 @@ static void phone_battery_handler(int charge_level) {
 	};
 }
 
-static void sendUpdate(int key) {
-    DictionaryIterator *iter;
-    app_message_outbox_begin(&iter);
-    dict_write_uint8(iter, key, 0);
-    app_message_outbox_send();
-    APP_LOG(APP_LOG_LEVEL_INFO, "Sent %d", key);
-}
 
 static void updateWeather(void *data) {
 	sendUpdate(CS_UPDATE_WEATHER_KEY);
