@@ -1,7 +1,5 @@
 #include <pebble.h>
 
-#define CS_BATTERY_LEVEL_KEY 0xFFFE
-#define CS_BATTERY_STATUS_KEY 0xFFFD
 #define CS_STOCK_TICKER_KEY 0xFFEF
 #define CS_STOCK_VALUE_KEY 0xFFEE
 #define CS_WEATHER_TEMP_F_KEY 0xFFDF
@@ -10,7 +8,6 @@
 #define CS_WEATHER_HUMID_KEY 0xFFDC
 #define CS_WEATHER_WIND_SPEED_KEY 0xFFDB
 #define CS_WEATHER_WIND_DIR_KEY 0xFFDA
-#define CS_UPDATE_BATTERY_KEY 0x0FFF
 #define CS_UPDATE_STOCK_KEY 0x0FFE
 #define CS_UPDATE_WEATHER_KEY 0x0FFD
 
@@ -20,7 +17,7 @@ static TextLayer *s_time_layer, *s_second_layer, *s_weather_layer, *s_date_layer
 //static BitmapLayer *s_background_layer;
 //static GBitmap *s_background_bitmap;
 
-static BitmapLayer *s_bticon_layer, *s_baticon_layer, *s_pbaticon_layer;
+static BitmapLayer *s_bticon_layer, *s_baticon_layer;
 static GBitmap *s_bticon_con_bitmap, *s_bticon_nc_bitmap, *s_baticon_00_bitmap,
     *s_baticon_10_bitmap, *s_baticon_20_bitmap, *s_baticon_30_bitmap, *s_baticon_40_bitmap,
 	*s_baticon_50_bitmap, *s_baticon_60_bitmap, *s_baticon_70_bitmap, *s_baticon_80_bitmap,
@@ -101,49 +98,6 @@ static void battery_handler(BatteryChargeState charge_state) {
 	};
 }
 
-static void phone_battery_handler(int charge_level) {
-
-    APP_LOG(APP_LOG_LEVEL_INFO, "PhoneBatteryStateChange. Level = %d", charge_level);
-
-	switch ((int)charge_level) {
-		case 0:
-			bitmap_layer_set_bitmap(s_pbaticon_layer, s_baticon_00_bitmap);
-			break;
-		case 10:
-			bitmap_layer_set_bitmap(s_pbaticon_layer, s_baticon_10_bitmap);
-			break;
-		case 20:
-			bitmap_layer_set_bitmap(s_pbaticon_layer, s_baticon_20_bitmap);
-			break;
-		case 30:
-			bitmap_layer_set_bitmap(s_pbaticon_layer, s_baticon_30_bitmap);
-			break;
-		case 40:
-			bitmap_layer_set_bitmap(s_pbaticon_layer, s_baticon_40_bitmap);
-			break;
-		case 50:
-			bitmap_layer_set_bitmap(s_pbaticon_layer, s_baticon_50_bitmap);
-			break;
-		case 60:
-			bitmap_layer_set_bitmap(s_pbaticon_layer, s_baticon_60_bitmap);
-			break;
-		case 70:
-			bitmap_layer_set_bitmap(s_pbaticon_layer, s_baticon_70_bitmap);
-			break;
-		case 80:
-			bitmap_layer_set_bitmap(s_pbaticon_layer, s_baticon_80_bitmap);
-			break;
-		case 90:
-			bitmap_layer_set_bitmap(s_pbaticon_layer, s_baticon_90_bitmap);
-			break;
-		case 100:
-			bitmap_layer_set_bitmap(s_pbaticon_layer, s_baticon_100_bitmap);
-			break;
-		default:
-			break;
-	};
-}
-
 static void sendUpdate(int key) {
     DictionaryIterator *iter;
     app_message_outbox_begin(&iter);
@@ -162,10 +116,6 @@ static void updateWeather(void *data) {
 	APP_LOG(APP_LOG_LEVEL_INFO, "Weather Timer Set");
 }
 
-static void updateBattery(void *data) {
-	sendUpdate(CS_UPDATE_BATTERY_KEY);
-}
-
 static void updateStock(void *data) {
 	sendUpdate(CS_UPDATE_STOCK_KEY);
 	if (stockHandle) {
@@ -180,7 +130,6 @@ static void updateStock(void *data) {
 static void sendUpdateAll() {
     DictionaryIterator *iter;
     app_message_outbox_begin(&iter);
-    dict_write_uint8(iter, CS_UPDATE_BATTERY_KEY, 0);
     dict_write_uint8(iter, CS_UPDATE_WEATHER_KEY, 0);
     dict_write_uint8(iter, CS_UPDATE_STOCK_KEY, 0);
     app_message_outbox_send();
@@ -228,13 +177,6 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
       		case CS_WEATHER_HUMID_KEY:
       			APP_LOG(APP_LOG_LEVEL_INFO, "Received Weather Data, Humidity: %s", tuple->value->cstring);
       			break;
-      		case CS_BATTERY_LEVEL_KEY:
-      			APP_LOG(APP_LOG_LEVEL_INFO, "Received Battery Data, Level: %d", (int)tuple->value->int32*10);
-				phone_battery_handler((int)tuple->value->int32*10);
-				break;
-			case CS_BATTERY_STATUS_KEY:
-      			APP_LOG(APP_LOG_LEVEL_INFO, "Received Battery Data, STATUS: %d", (int)tuple->value->int8);
-				break;
 			case CS_STOCK_VALUE_KEY:
 				APP_LOG(APP_LOG_LEVEL_INFO, "Received Stock Data, Value: %s", tuple->value->cstring);
 				snprintf(stock_value_buffer, sizeof(stock_value_buffer), "%s", tuple->value->cstring);
@@ -312,34 +254,6 @@ static void bt_handler(bool connected) {
     vibes_double_pulse();
   }
 }
-
-/*static void set_bat_icon_color() {
-	s_baticon_00_bitmap = gbitmap_create_with_resource(RESOURCE_ID_BAT_COLOR_00);
-	s_baticon_10_bitmap = gbitmap_create_with_resource(RESOURCE_ID_BAT_COLOR_10);
-	s_baticon_20_bitmap = gbitmap_create_with_resource(RESOURCE_ID_BAT_COLOR_20);
-	s_baticon_30_bitmap = gbitmap_create_with_resource(RESOURCE_ID_BAT_COLOR_30);
-	s_baticon_40_bitmap = gbitmap_create_with_resource(RESOURCE_ID_BAT_COLOR_40);
-	s_baticon_50_bitmap = gbitmap_create_with_resource(RESOURCE_ID_BAT_COLOR_50);
-	s_baticon_60_bitmap = gbitmap_create_with_resource(RESOURCE_ID_BAT_COLOR_60);
-	s_baticon_70_bitmap = gbitmap_create_with_resource(RESOURCE_ID_BAT_COLOR_70);
-	s_baticon_80_bitmap = gbitmap_create_with_resource(RESOURCE_ID_BAT_COLOR_80);
-	s_baticon_90_bitmap = gbitmap_create_with_resource(RESOURCE_ID_BAT_COLOR_90);
-	s_baticon_100_bitmap = gbitmap_create_with_resource(RESOURCE_ID_BAT_COLOR_100);
-}
-
-static void set_bat_icon_mono() {
-	s_baticon_00_bitmap = gbitmap_create_with_resource(RESOURCE_ID_BAT_MONO_00);
-	s_baticon_10_bitmap = gbitmap_create_with_resource(RESOURCE_ID_BAT_MONO_10);
-	s_baticon_20_bitmap = gbitmap_create_with_resource(RESOURCE_ID_BAT_MONO_20);
-	s_baticon_30_bitmap = gbitmap_create_with_resource(RESOURCE_ID_BAT_MONO_30);
-	s_baticon_40_bitmap = gbitmap_create_with_resource(RESOURCE_ID_BAT_MONO_40);
-	s_baticon_50_bitmap = gbitmap_create_with_resource(RESOURCE_ID_BAT_MONO_50);
-	s_baticon_60_bitmap = gbitmap_create_with_resource(RESOURCE_ID_BAT_MONO_60);
-	s_baticon_70_bitmap = gbitmap_create_with_resource(RESOURCE_ID_BAT_MONO_70);
-	s_baticon_80_bitmap = gbitmap_create_with_resource(RESOURCE_ID_BAT_MONO_80);
-	s_baticon_90_bitmap = gbitmap_create_with_resource(RESOURCE_ID_BAT_MONO_90);
-	s_baticon_100_bitmap = gbitmap_create_with_resource(RESOURCE_ID_BAT_MONO_100);
-}*/
 
 static void set_bat_icon() {
 	s_baticon_00_bitmap = gbitmap_create_with_resource(PBL_IF_COLOR_ELSE(RESOURCE_ID_BAT_COLOR_00,RESOURCE_ID_BAT_MONO_00));
@@ -440,7 +354,7 @@ static void drawBattery(Layer *root) {
 
   	// Create BitmapLayer to display the GBitmap
   	s_baticon_layer = bitmap_layer_create(GRect(layer_get_bounds(root).size.w - 20, 137, 20, 30));
-    s_pbaticon_layer = bitmap_layer_create(GRect(layer_get_bounds(root).size.w - 40, 137, 20, 30));
+    // s_pbaticon_layer = bitmap_layer_create(GRect(layer_get_bounds(root).size.w - 40, 137, 20, 30));
 
 
   	//use battery handler to set state on window draw
@@ -449,8 +363,6 @@ static void drawBattery(Layer *root) {
 
   	bitmap_layer_set_compositing_mode(s_baticon_layer, GCompOpSet);
   	layer_add_child(root, bitmap_layer_get_layer(s_baticon_layer));
-	bitmap_layer_set_compositing_mode(s_pbaticon_layer, GCompOpSet);
-  	layer_add_child(root, bitmap_layer_get_layer(s_pbaticon_layer));
 }
 
 static void drawBT(Layer *root) {
