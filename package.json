@@ -5,14 +5,19 @@
     "name": "csfreakpebbleface",
     "pebble": {
         "capabilities": [
-            "location"
+            "location",
+            "configurable"
         ],
         "displayName": "CSfreak IOS Watchface",
         "enableMultiJS": false,
-        "messageKeys": {
-            "KEY_CONDITIONS": 1,
-            "KEY_TEMPERATURE": 0
-        },
+        "messageKeys": [
+            "CS_WEATHER_TEMP_F_KEY",
+            "CS_WEATHER_COND_KEY",
+            "CS_STOCK_TICKER_KEY",
+            "CS_STOCK_VALUE_KEY",
+            "CS_UPDATE_STOCK_KEY",
+            "CS_UPDATE_WEATHER_KEY"
+        ],
         "projectType": "native",
         "resources": {
             "media": [
@@ -120,14 +125,7 @@
                 },
                 {
                     "file": "fonts/perfect-dos-vga.ttf",
-                    "name": "FONT_PERFECT_DOS_40",
-                    "targetPlatforms": null,
-                    "type": "font"
-                },
-                {
-                    "compatibility": "2.7",
-                    "file": "fonts/perfect-dos-vga.ttf",
-                    "name": "FONT_PERFECT_DOS_22",
+                    "name": "FONT_PERFECT_DOS_18",
                     "targetPlatforms": null,
                     "type": "font"
                 },
@@ -139,8 +137,15 @@
                     "type": "font"
                 },
                 {
+                    "compatibility": "2.7",
                     "file": "fonts/perfect-dos-vga.ttf",
-                    "name": "FONT_PERFECT_DOS_18",
+                    "name": "FONT_PERFECT_DOS_22",
+                    "targetPlatforms": null,
+                    "type": "font"
+                },
+                {
+                    "file": "fonts/perfect-dos-vga.ttf",
+                    "name": "FONT_PERFECT_DOS_40",
                     "targetPlatforms": null,
                     "type": "font"
                 }
@@ -148,7 +153,6 @@
         },
         "sdkVersion": "3",
         "targetPlatforms": [
-            "aplite",
             "basalt"
         ],
         "uuid": "325fdc12-bf67-48fa-a571-83876880ef88",

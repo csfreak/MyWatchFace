@@ -3,11 +3,7 @@
 #define CS_STOCK_TICKER_KEY 0xFFEF
 #define CS_STOCK_VALUE_KEY 0xFFEE
 #define CS_WEATHER_TEMP_F_KEY 0xFFDF
-#define CS_WEATHER_TEMP_C_KEY 0xFFDE
 #define CS_WEATHER_COND_KEY 0xFFDD
-#define CS_WEATHER_HUMID_KEY 0xFFDC
-#define CS_WEATHER_WIND_SPEED_KEY 0xFFDB
-#define CS_WEATHER_WIND_DIR_KEY 0xFFDA
 #define CS_UPDATE_STOCK_KEY 0x0FFE
 #define CS_UPDATE_WEATHER_KEY 0x0FFD
 
@@ -170,12 +166,6 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
       			snprintf(conditions_buffer, sizeof(conditions_buffer), "%s", tuple->value->cstring);
       			snprintf(weather_layer_buffer, sizeof(weather_layer_buffer), "%s, %s", temperature_buffer, conditions_buffer);
     			text_layer_set_text(s_weather_layer, weather_layer_buffer);
-      			break;
-      		case CS_WEATHER_TEMP_C_KEY:
-      			APP_LOG(APP_LOG_LEVEL_INFO, "Received Weather Data, Temp C: %s", tuple->value->cstring);
-      			break;
-      		case CS_WEATHER_HUMID_KEY:
-      			APP_LOG(APP_LOG_LEVEL_INFO, "Received Weather Data, Humidity: %s", tuple->value->cstring);
       			break;
 			case CS_STOCK_VALUE_KEY:
 				APP_LOG(APP_LOG_LEVEL_INFO, "Received Stock Data, Value: %s", tuple->value->cstring);
