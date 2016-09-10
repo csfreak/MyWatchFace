@@ -17,14 +17,6 @@
         "resources": {
             "media": [
                 {
-                    "file": "images/bluetooth-icon-mono-not-connected-slash-30x30.png",
-                    "name": "BITMAP_BT_MONO_NC",
-                    "targetPlatforms": [
-                        "aplite"
-                    ],
-                    "type": "bitmap"
-                },
-                {
                     "file": "images/bluetooth-icon-connected-30x30.png",
                     "name": "BITMAP_BT_COLOR_CON",
                     "targetPlatforms": null,
@@ -35,94 +27,6 @@
                     "name": "BITMAP_BT_COLOR_NC",
                     "targetPlatforms": [
                         "basalt"
-                    ],
-                    "type": "bitmap"
-                },
-                {
-                    "file": "images/BAT-mono-90.png",
-                    "name": "BAT_MONO_90",
-                    "targetPlatforms": [
-                        "aplite"
-                    ],
-                    "type": "bitmap"
-                },
-                {
-                    "file": "images/BAT-mono-80.png",
-                    "name": "BAT_MONO_80",
-                    "targetPlatforms": [
-                        "aplite"
-                    ],
-                    "type": "bitmap"
-                },
-                {
-                    "file": "images/BAT-mono-70.png",
-                    "name": "BAT_MONO_70",
-                    "targetPlatforms": [
-                        "aplite"
-                    ],
-                    "type": "bitmap"
-                },
-                {
-                    "file": "images/BAT-mono-60.png",
-                    "name": "BAT_MONO_60",
-                    "targetPlatforms": [
-                        "aplite"
-                    ],
-                    "type": "bitmap"
-                },
-                {
-                    "file": "images/BAT-mono-50.png",
-                    "name": "BAT_MONO_50",
-                    "targetPlatforms": [
-                        "aplite"
-                    ],
-                    "type": "bitmap"
-                },
-                {
-                    "file": "images/BAT-mono-40.png",
-                    "name": "BAT_MONO_40",
-                    "targetPlatforms": [
-                        "aplite"
-                    ],
-                    "type": "bitmap"
-                },
-                {
-                    "file": "images/BAT-mono-30.png",
-                    "name": "BAT_MONO_30",
-                    "targetPlatforms": [
-                        "aplite"
-                    ],
-                    "type": "bitmap"
-                },
-                {
-                    "file": "images/BAT-mono-20.png",
-                    "name": "BAT_MONO_20",
-                    "targetPlatforms": [
-                        "aplite"
-                    ],
-                    "type": "bitmap"
-                },
-                {
-                    "file": "images/BAT-mono-100.png",
-                    "name": "BAT_MONO_100",
-                    "targetPlatforms": [
-                        "aplite"
-                    ],
-                    "type": "bitmap"
-                },
-                {
-                    "file": "images/BAT-mono-10.png",
-                    "name": "BAT_MONO_10",
-                    "targetPlatforms": [
-                        "aplite"
-                    ],
-                    "type": "bitmap"
-                },
-                {
-                    "file": "images/BAT-mono-00.png",
-                    "name": "BAT_MONO_00",
-                    "targetPlatforms": [
-                        "aplite"
                     ],
                     "type": "bitmap"
                 },
