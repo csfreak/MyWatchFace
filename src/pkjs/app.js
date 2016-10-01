@@ -1,11 +1,4 @@
 var myAPIKey = '81d7cd5bbf216ebdbff899b3019c69c7';
-// Import the Clay package
-var Clay = require('pebble-clay');
-// Load our Clay configuration file
-var clayConfig = require('./config');
-// Initialize Clay
-var clay = new Clay(clayConfig);
-
 
 var xhrRequest = function (url, type, callback) {
   var xhr = new XMLHttpRequest();
@@ -48,12 +41,7 @@ function locationSuccess(pos) {
       var json = JSON.parse(responseText);
       console.log("Raw JSON " + JSON.stringify(json));
       // Temperature in Kelvin requires adjustment
-      var temperature;
-      if (clay.getItemByMessageKey('WEATHER_DEG') == 'C') {
-          temperature = Math.round(json.main.temp - 273.15);
-      } else {
-          temperature = Math.round((json.main.temp - 273.15) * 1.800 + 32.0);
-      }    
+      var temperature = Math.round((json.main.temp - 273.15) * 1.800 + 32.0);
       //var temperature = 52;
       console.log("Temperature is " + temperature);
 
@@ -99,18 +87,18 @@ Pebble.addEventListener('ready',
     console.log("PebbleKit JS ready!");
     // Get the initial weather
     getWeather();
-    getStock(clay.getItemByMessageKey('STOCK_TICKER'));
+    getStock('VSAT');
   }
 );
 
 // Listen for when an AppMessage is received
 Pebble.addEventListener('appmessage',
   function(e) {
-      if(e.payload.UPDATE_WEATHER) {
+      if(e.payload['UPDATE_WEATHER']) {
           getWeather();
       }
-      if(e.payload.UPDATE_STOCK) {
-          getStock(clay.getItemByMessageKey('STOCK_TICKER'));
+      if(e.payload['UPDATE_STOCK']) {
+          getStock('VSAT');
       }
     console.log("AppMessage received!");
     
